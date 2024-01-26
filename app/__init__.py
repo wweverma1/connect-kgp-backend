@@ -3,12 +3,19 @@ import os
 
 # Related third party imports
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 from dotenv import load_dotenv
 
 # Local app specific imports
 load_dotenv()
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DB_URL")
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+SCHEMA_NAME = os.getenv("SCHEMA_NAME")
 
 from app.home.routes import home_api
 from app.user.routes import user_api

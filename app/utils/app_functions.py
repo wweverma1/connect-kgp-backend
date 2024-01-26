@@ -1,23 +1,21 @@
 # Standard library imports
 import time
 from datetime import datetime
+
 # import os
-import logging
+import os
 
 # Related third party imports
 from flask import request
-# from email.mime.multipart import MIMEMultipart
-# from email.mime.text import MIMEText
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # Local app specific imports
 from app import app
 
-# Move configuration settings to environment variables
-# EMAIL_SERVER = os.environ.get('EMAIL_SERVER', 'smtp.example.com')
-# EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
-# EMAIL_USERNAME = os.environ.get('EMAIL_USERNAME', 'username')
-# EMAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD', 'password')
-
+sender_email = os.getenv("EMAIL")
+sender_password = os.getenv("EMAIL_PASS")
 
 @app.before_request
 def before_request():
@@ -31,3 +29,22 @@ def after_request(response):
         latency = int((end_time - request.start_time) * 1000)
         print(f'[ {str(datetime.now())} ] endpoint {request.endpoint} latency {latency} req_id {request.environ.get("FLASK_REQUEST_ID")}')
     return response
+
+def send_email(recipient_email, subject, body):
+    print(sender_email, sender_password)
+    try:
+        # Create the email message
+        message = MIMEMultipart()
+        message['From'] = sender_email
+        message['To'] = recipient_email
+        message['Subject'] = subject
+        message.attach(MIMEText(body, 'plain'))
+
+        # Connect to the SMTP server and send the email
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, recipient_email, message.as_string())
+        return True
+    except Exception as e:
+        print(f'Email Sending Failed: {str(e)}')
+        return False
