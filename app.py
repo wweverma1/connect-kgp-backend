@@ -7,7 +7,7 @@ from app import db
 import traceback
 from sqlalchemy.exc import SQLAlchemyError
 
-CORS(app, origins='*')
+CORS(app, resources={r"/*": {"origins": '*'}})
 socketio = SocketIO(app, cors_allowed_origins='*')
 
 idleUsers = []
