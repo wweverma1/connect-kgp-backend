@@ -2,6 +2,10 @@ from app import app
 from flask import request
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
+from app.user.models import User
+from app import db
+import traceback
+from sqlalchemy.exc import SQLAlchemyError
 
 CORS(app, origins='*')
 socketio = SocketIO(app, cors_allowed_origins='*')
@@ -64,6 +68,19 @@ def handle_disconnect():
         del matches[user_id]
         del matches[match_id]
         handle_idle(match_id)
+
+@socketio.on('report')
+def handle_report(user_id):
+    user = db.session.query(User).filter_by(id=user_id).one_or_none()
+    if not user:
+        return
+    try:
+        user.rating -= 1
+        db.session.commit()
+    except SQLAlchemyError as e:
+        print(e)
+        traceback.print_exc()
+        db.session.rollback()
     
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)

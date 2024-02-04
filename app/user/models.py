@@ -15,6 +15,7 @@ class User(db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     dob = db.Column(db.Date, nullable=False)
     password = db.Column(db.LargeBinary, nullable=False)
+    rating = db.Column(db.Integer, default=0)
 
     @staticmethod
     def create_user(name, email, dob, password):
@@ -23,7 +24,8 @@ class User(db.Model):
                 name=name, 
                 email=email, 
                 dob=dob, 
-                password=password
+                password=password,
+                rating=0
             )
             db.session.add(user)
             db.session.commit()
