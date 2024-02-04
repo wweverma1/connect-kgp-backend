@@ -25,8 +25,8 @@ def handle_idle(user_id):
         socketio.emit('match', {'user_id': matched_user_2}, to=matched_user_1)
         socketio.emit('match', {'user_id': matched_user_1}, to=matched_user_2)
 
-@socketio.on('connect')
-def handle_connect():
+@socketio.on('connection')
+def handle_connection():
     global idleUsers
     global matches
 
