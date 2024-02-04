@@ -1,13 +1,11 @@
 from app import app
 from flask import request
-from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 from app.user.models import User
 from app import db
 import traceback
 from sqlalchemy.exc import SQLAlchemyError
 
-CORS(app, resources={r"/*": {"origins": '*'}})
 socketio = SocketIO(app, cors_allowed_origins='*')
 
 idleUsers = []
