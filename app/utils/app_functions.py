@@ -31,7 +31,6 @@ def after_request(response):
     return response
 
 def send_email(recipient_email, subject, body):
-    print(sender_email, sender_password)
     try:
         # Create the email message
         message = MIMEMultipart()

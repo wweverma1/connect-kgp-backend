@@ -1,34 +1,30 @@
 # Standard library imports
-from datetime import datetime
 import traceback
 
 # Related third party imports
-from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.exc import SQLAlchemyError
 
 # Local app specific imports
 from app import db
 
 class User(db.Model):
-    __tablename__ = 'users'
+    __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
-    dob = db.Column(db.Date, nullable=True)
-    password = db.Column(db.String(255), nullable=False)
+    dob = db.Column(db.Date, nullable=False)
+    password = db.Column(db.LargeBinary, nullable=False)
 
-    def __init__(self, name, email, password, dob=None):
-        self.name = name
-        self.email = email
-        self.set_password(password)
-        self.dob = dob
-
-    @classmethod
-    def create_user(cls, name, email, password, dob=None):
+    @staticmethod
+    def create_user(name, email, dob, password):
         try:
-            user = cls(name=name, email=email, password=password, dob=dob)
+            user = User(
+                name=name, 
+                email=email, 
+                dob=dob, 
+                password=password
+            )
             db.session.add(user)
             db.session.commit()
             return user
@@ -37,17 +33,3 @@ class User(db.Model):
             traceback.print_exc()
             db.session.rollback()
             return False
-        
-    def set_password(self, password):
-        self.password = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password, password)
-
-    @classmethod
-    def is_email_registered(cls, email):
-        return cls.query.filter_by(email=email).first() is not None
-
-    def change_password(self, new_password):
-        self.set_password(new_password)
-        db.session.commit()
