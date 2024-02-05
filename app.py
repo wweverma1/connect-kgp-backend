@@ -8,17 +8,17 @@ from sqlalchemy.exc import SQLAlchemyError
 
 socketio = SocketIO(app, cors_allowed_origins='*')
 
-idleUsers = []
+idleUsers = set()
 matches = {}
 
 def handle_idle(user_id):
     global idleUsers
     global matches
 
-    idleUsers.append(user_id)
+    idleUsers.add(user_id)
     if len(idleUsers) > 1:
-        matched_user_1 = idleUsers.pop(0)
-        matched_user_2 = idleUsers.pop(0)
+        matched_user_1 = idleUsers.pop()
+        matched_user_2 = idleUsers.pop()
         print("** match **\t", matched_user_1, " - ", matched_user_2)
         matches[matched_user_1] = matched_user_2
         matches[matched_user_2] = matched_user_1
@@ -34,8 +34,8 @@ def handle_connection():
 
     print("** user joined **\t", user_id)
 
-    if len(idleUsers):
-        match_id = idleUsers.pop(0)
+    if idleUsers:
+        match_id = idleUsers.pop()
         print("** match **\t", user_id, " - ", match_id)
         matches[user_id] = match_id
         matches[match_id] = user_id
