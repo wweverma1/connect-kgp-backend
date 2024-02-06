@@ -1,8 +1,7 @@
 # Standard library imports
 from datetime import datetime
-from datetime import timedelta
+from sqlalchemy import ARRAY
 import traceback
-import random
 
 # Related third party imports
 from sqlalchemy.exc import SQLAlchemyError
@@ -19,6 +18,9 @@ class Feed(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now())
     content = db.Column(db.Text, nullable=False)
     rating = db.Column(db.Integer, default=0)
+    liked_by = db.Column(ARRAY(db.Integer), default=[])
+    disliked_by = db.Column(ARRAY(db.Integer), default=[])
+
 
     @staticmethod
     def post_feed(content):
@@ -27,6 +29,8 @@ class Feed(db.Model):
                 created_at=datetime.now(),
                 content=content,
                 rating=0,
+                liked_by=[],
+                disliked_by=[]
             )
             db.session.add(feed)
             db.session.commit()

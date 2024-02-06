@@ -69,7 +69,9 @@ def getFeeds():
             'id': feed.id,
             'created_at': feed.created_at,
             'content': feed.content,
-            'rating': feed.rating
+            'rating': feed.rating,
+            'liked_by': feed.liked_by,
+            'disliked_by': feed.disliked_by
         }
         feeds_list.append(feed_data)
 
@@ -86,6 +88,7 @@ def postFeed():
 def voteFeed():
     feed_id = request.form['feed_id']
     vote = int(request.form['vote'])
+    user_id = request.form['user_id']
 
     feed = db.session.query(Feed).filter_by(id=feed_id).one_or_none()
     if not feed:
@@ -93,6 +96,14 @@ def voteFeed():
     
     try:
         feed.rating += vote
+        if vote == 1:
+            if user_id in feed.disliked_by:
+                feed.disliked_by.remove(user_id)
+            feed.liked_by.append(user_id)
+        else:
+            if user_id in feed.liked_by:
+                feed.liked_by.remove(user_id)
+            feed.disliked_by.append(user_id)
         db.session.commit()
         return jsonify({"message": "Feed voted"}), 200
     except SQLAlchemyError as e:
