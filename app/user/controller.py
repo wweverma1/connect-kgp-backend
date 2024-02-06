@@ -80,7 +80,7 @@ def getFeeds():
 def postFeed():
     content = request.form['content']
 
-    feed = Feed.post_feed(content)
+    feed = Feed.post_feed(content.strip())
     if not feed:
         return jsonify({"error": "Some error occured while posting your status"}), 500
     return jsonify({"message": "Status posted"}), 200
@@ -90,11 +90,11 @@ def voteFeed():
     vote = int(request.form['vote'])
     user_id = request.form['user_id']
 
-    feed = db.session.query(Feed).filter_by(id=feed_id).one_or_none()
-    if not feed:
-        return jsonify({"error": "Invalid feed"}), 400
-    
     try:
+        feed = db.session.query(Feed).filter_by(id=feed_id).one_or_none()
+        if not feed:
+            return jsonify({"error": "Invalid feed"}), 400
+        
         feed.rating += vote
         if vote == 1:
             if user_id in feed.disliked_by:
@@ -104,8 +104,10 @@ def voteFeed():
             if user_id in feed.liked_by:
                 feed.liked_by.remove(user_id)
             feed.disliked_by.append(user_id)
+
         db.session.commit()
         return jsonify({"message": "Feed voted"}), 200
+
     except SQLAlchemyError as e:
         print(e)
         traceback.print_exc()

@@ -1,6 +1,7 @@
 # Standard library imports
 from datetime import datetime
 from sqlalchemy import ARRAY
+from sqlalchemy.ext.mutable import Mutable
 import traceback
 
 # Related third party imports
@@ -11,6 +12,20 @@ from app import (
     db,
 )
 
+class MutableList(Mutable, list):
+    def append(self, value):
+        list.append(self, value)
+        self.changed()
+
+    @classmethod
+    def coerce(cls, key, value):
+        if not isinstance(value, MutableList):
+            if isinstance(value, list):
+                return MutableList(value)
+            return Mutable.coerce(key, value)
+        else:
+            return value
+        
 class Feed(db.Model):
     __tablename__ = 'feed'
 
@@ -18,9 +33,8 @@ class Feed(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.now())
     content = db.Column(db.Text, nullable=False)
     rating = db.Column(db.Integer, default=0)
-    liked_by = db.Column(ARRAY(db.Integer), default=[])
-    disliked_by = db.Column(ARRAY(db.Integer), default=[])
-
+    liked_by = db.Column(MutableList.as_mutable(ARRAY(db.Integer)), default=[])
+    disliked_by = db.Column(MutableList.as_mutable(ARRAY(db.Integer)), default=[])
 
     @staticmethod
     def post_feed(content):
@@ -40,3 +54,4 @@ class Feed(db.Model):
             traceback.print_exc()
             db.session.rollback()
             return False
+        
