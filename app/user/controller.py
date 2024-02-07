@@ -94,16 +94,31 @@ def voteFeed():
         feed = db.session.query(Feed).filter_by(id=feed_id).one_or_none()
         if not feed:
             return jsonify({"error": "Invalid feed"}), 400
-        
-        if user_id in feed.disliked_by:
-            feed.disliked_by.remove(user_id)
-        if user_id in feed.liked_by:
-            feed.liked_by.remove(user_id)
+
         if vote == 1:
-            feed.liked_by.append(user_id)
+            if user_id in feed.disliked_by:
+                feed.disliked_by.remove(user_id)
+                feed.liked_by.append(user_id)
+                feed.rating += 2
+            elif user_id in feed.liked_by:
+                feed.liked_by.remove(user_id)
+                feed.rating -= 1
+            else:
+                feed.liked_by.append(user_id)
+                feed.rating += 1
+        elif vote == -1:
+            if user_id in feed.liked_by:
+                feed.liked_by.remove(user_id)
+                feed.disliked_by.append(user_id)
+                feed.rating -= 2
+            elif user_id in feed.disliked_by:
+                feed.disliked_by.remove(user_id)
+                feed.rating += 1
+            else:
+                feed.disliked_by.append(user_id)
+                feed.rating -= 1
         else:
-            feed.disliked_by.append(user_id)
-        feed.rating += vote
+            return jsonify({"error": "Invalid vote value"}), 400
 
         db.session.commit()
         return jsonify({"message": "Feed voted"}), 200
