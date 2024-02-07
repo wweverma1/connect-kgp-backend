@@ -88,19 +88,19 @@ def postFeed():
 def voteFeed():
     feed_id = request.form['feed_id']
     vote = int(request.form['vote'])
-    user_id = request.form['user_id']
+    user_id = int(request.form['user_id'])
 
     try:
         feed = db.session.query(Feed).filter_by(id=feed_id).one_or_none()
         if not feed:
             return jsonify({"error": "Invalid feed"}), 400
-
         if vote == 1:
             if user_id in feed.disliked_by:
                 feed.disliked_by.remove(user_id)
                 feed.liked_by.append(user_id)
                 feed.rating += 2
             elif user_id in feed.liked_by:
+                print("already liked")
                 feed.liked_by.remove(user_id)
                 feed.rating -= 1
             else:
@@ -112,6 +112,7 @@ def voteFeed():
                 feed.disliked_by.append(user_id)
                 feed.rating -= 2
             elif user_id in feed.disliked_by:
+                print("already disliked")
                 feed.disliked_by.remove(user_id)
                 feed.rating += 1
             else:
