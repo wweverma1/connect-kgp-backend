@@ -100,7 +100,6 @@ def voteFeed():
                 feed.liked_by.append(user_id)
                 feed.rating += 2
             elif user_id in feed.liked_by:
-                print("already liked")
                 feed.liked_by.remove(user_id)
                 feed.rating -= 1
             else:
@@ -112,7 +111,6 @@ def voteFeed():
                 feed.disliked_by.append(user_id)
                 feed.rating -= 2
             elif user_id in feed.disliked_by:
-                print("already disliked")
                 feed.disliked_by.remove(user_id)
                 feed.rating += 1
             else:
