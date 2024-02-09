@@ -47,7 +47,7 @@ def handle_connection(chatType):
 
     user_id = request.sid
 
-    print("** user joined **\t", user_id)
+    print("** user joined **\t", user_id, chatType)
     session['user_data'] = {'user_id': user_id, 'chat_type': chatType}
     
     if chatType == "voice":
@@ -69,15 +69,19 @@ def handle_connection(chatType):
                 matches[match_id] = user_id
                 socketio.emit('match', {'user_id': match_id}, to=user_id)
                 socketio.emit('match', {'user_id': user_id}, to=match_id)
-            else:
-                handle_idle(user_id, chatType)
+        else:
+            handle_idle(user_id, chatType)
 
 @socketio.on('callUser')
 def handle_call_user(signal):
+    global matches 
+    print('received call from ', request.sid)
     socketio.emit('callUser', signal, to=matches[request.sid])
 
 @socketio.on('answerCall')
 def handle_answer_call(signal):
+    global matches
+    print('received answered by ', request.sid)
     socketio.emit('callAccepted', signal, to=matches[request.sid])
 
 @socketio.on('message')
@@ -91,6 +95,7 @@ def handle_chat_message(message):
 def handle_disconnect():
     global idleUsers
     global matches
+    global idleAudioUsers
 
     user_id = request.sid
     user_data = session.get('user_data', {})
