@@ -1,5 +1,5 @@
 from app import app
-from flask import request
+from flask import request, session
 from flask_socketio import SocketIO, emit
 from app.user.models import User
 from app import db
@@ -9,40 +9,76 @@ from sqlalchemy.exc import SQLAlchemyError
 socketio = SocketIO(app, cors_allowed_origins='*')
 
 idleUsers = set()
+idleAudioUsers = set()
 matches = {}
 
-def handle_idle(user_id):
+def handle_idle(user_id, chatType):
     global idleUsers
+    global idleAudioUsers
     global matches
 
-    idleUsers.add(user_id)
-    if len(idleUsers) > 1:
-        matched_user_1 = idleUsers.pop()
-        matched_user_2 = idleUsers.pop()
-        print("** match **\t", matched_user_1, " - ", matched_user_2)
-        matches[matched_user_1] = matched_user_2
-        matches[matched_user_2] = matched_user_1
-        socketio.emit('match', {'user_id': matched_user_2}, to=matched_user_1)
-        socketio.emit('match', {'user_id': matched_user_1}, to=matched_user_2)
+    if chatType == "voice":
+        idleAudioUsers.add(user_id)
+        if len(idleAudioUsers) > 1:
+            matched_user_1 = idleAudioUsers.pop()
+            matched_user_2 = idleAudioUsers.pop()
+            if matched_user_1 != matched_user_2:
+                print("** match **\t", matched_user_1, " - ", matched_user_2)
+                matches[matched_user_1] = matched_user_2
+                matches[matched_user_2] = matched_user_1
+                socketio.emit('match', {'user_id': matched_user_2}, to=matched_user_1)
+    else:
+        idleUsers.add(user_id)
+        if len(idleUsers) > 1:
+            matched_user_1 = idleUsers.pop()
+            matched_user_2 = idleUsers.pop()
+            if matched_user_1 != matched_user_2:
+                print("** match **\t", matched_user_1, " - ", matched_user_2)
+                matches[matched_user_1] = matched_user_2
+                matches[matched_user_2] = matched_user_1
+                socketio.emit('match', {'user_id': matched_user_2}, to=matched_user_1)
+                socketio.emit('match', {'user_id': matched_user_1}, to=matched_user_2)
 
 @socketio.on('connection')
-def handle_connection():
+def handle_connection(chatType):
     global idleUsers
+    global idleAudioUsers
     global matches
 
     user_id = request.sid
 
     print("** user joined **\t", user_id)
-
-    if idleUsers:
-        match_id = idleUsers.pop()
-        print("** match **\t", user_id, " - ", match_id)
-        matches[user_id] = match_id
-        matches[match_id] = user_id
-        socketio.emit('match', {'user_id': match_id}, to=user_id)
-        socketio.emit('match', {'user_id': user_id}, to=match_id)
+    session['user_data'] = {'user_id': user_id, 'chat_type': chatType}
+    
+    if chatType == "voice":
+        if idleAudioUsers:
+            match_id = idleAudioUsers.pop()
+            if user_id != match_id:
+                print("** match **\t", user_id, " - ", match_id)
+                matches[user_id] = match_id
+                matches[match_id] = user_id
+                socketio.emit('match', {'user_id': match_id}, to=user_id)
+        else:
+            handle_idle(user_id, chatType)
     else:
-        handle_idle(user_id)
+        if idleUsers:
+            match_id = idleUsers.pop()
+            if user_id != match_id:
+                print("** match **\t", user_id, " - ", match_id)
+                matches[user_id] = match_id
+                matches[match_id] = user_id
+                socketio.emit('match', {'user_id': match_id}, to=user_id)
+                socketio.emit('match', {'user_id': user_id}, to=match_id)
+            else:
+                handle_idle(user_id, chatType)
+
+@socketio.on('callUser')
+def handle_call_user(signal):
+    socketio.emit('callUser', signal, to=matches[request.sid])
+
+@socketio.on('answerCall')
+def handle_answer_call(signal):
+    socketio.emit('callAccepted', signal, to=matches[request.sid])
 
 @socketio.on('message')
 def handle_chat_message(message):
@@ -57,15 +93,27 @@ def handle_disconnect():
     global matches
 
     user_id = request.sid
+    user_data = session.get('user_data', {})
+    chatType = user_data.get('chat_type', None)
 
-    if user_id in idleUsers:
-        idleUsers.remove(user_id)
+    if chatType == "voice":
+        if user_id in idleAudioUsers:
+            idleAudioUsers.remove(user_id)
+        else:
+            match_id = matches[user_id]
+            socketio.emit('unmatch', to=match_id)
+            del matches[user_id]
+            del matches[match_id]
+            handle_idle(match_id, chatType)
     else:
-        match_id = matches[user_id]
-        socketio.emit('unmatch', to=match_id)
-        del matches[user_id]
-        del matches[match_id]
-        handle_idle(match_id)
+        if user_id in idleUsers:
+            idleUsers.remove(user_id)
+        else:
+            match_id = matches[user_id]
+            socketio.emit('unmatch', to=match_id)
+            del matches[user_id]
+            del matches[match_id]
+            handle_idle(match_id, chatType)
 
 @socketio.on('report')
 def handle_report(user_id):
