@@ -76,7 +76,8 @@ def handle_connection(chatType):
 def handle_call_user(signal):
     global matches 
     print('received call from ', request.sid)
-    socketio.emit('callUser', signal, to=matches[request.sid])
+    match_id = matches[request.sid]
+    socketio.emit('callUser', { 'signal': signal, 'match_id': match_id }, to=matches[request.sid])
 
 @socketio.on('answerCall')
 def handle_answer_call(signal):
