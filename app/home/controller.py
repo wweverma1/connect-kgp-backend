@@ -19,8 +19,8 @@ def postRating():
 
 def getRating():
     response = {}
-    user_id = request.form.get('user_id')
-    
+    user_id = request.args.get('user_id')
+
     if user_id:
         user_rating = db.session.query(Rating.rating).filter_by(rated_by_user_id=user_id).first()
         if user_rating:
