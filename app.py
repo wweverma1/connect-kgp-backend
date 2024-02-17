@@ -102,6 +102,8 @@ def handle_disconnect():
     user_data = session.get('user_data', {})
     chatType = user_data.get('chat_type', None)
 
+    print("** user left **\t", user_id, chatType)
+
     if chatType == "voice":
         if user_id in idleAudioUsers:
             idleAudioUsers.remove(user_id)
