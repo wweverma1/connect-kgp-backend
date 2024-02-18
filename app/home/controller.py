@@ -15,7 +15,7 @@ def postRating():
     rating = Rating.post_rating(user_id, rating)
     if not rating:
         return jsonify({"error": "Some error occured while posting your rating"}), 500    
-    return jsonify({"message": "rating submitted", "rating": rating.rating}), 200
+    return jsonify({"message": "rating submitted"}), 200
 
 def getRating():
     response = {}
