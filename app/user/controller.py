@@ -161,3 +161,24 @@ def verifyUser():
         return jsonify({"message": "otp validated"}), 200
     else:
         return jsonify({"error": "Incorrect OTP, Unable to Verify"}), 400
+    
+def updatePassword():
+    user_id = request.form['user_id']
+    password = request.form['password']
+
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
+    try:
+        user = db.session.query(User).filter_by(id=user_id).one_or_none()
+        if not user:
+            return jsonify({"error": "Invalid user id"}), 400
+
+        user.password = hashed_password
+        db.session.commit()
+        return jsonify({"user_id": user_id}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Database error: {str(e)}"}), 500
+
+

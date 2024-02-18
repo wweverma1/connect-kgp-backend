@@ -8,7 +8,8 @@ from app.user.controller import (
     postFeed, 
     voteFeed,
     findUser,
-    verifyUser
+    verifyUser,
+    updatePassword
 )
 
 user_api = Blueprint('user', __name__)
@@ -21,3 +22,4 @@ user_api.add_url_rule(rule='/feed', view_func=postFeed, methods=['POST'])
 user_api.add_url_rule(rule='/feed/vote', view_func=voteFeed, methods=['POST'])
 user_api.add_url_rule(rule='/find-user', view_func=findUser, methods=['GET'])
 user_api.add_url_rule(rule='/password-verify-email', view_func=verifyUser, methods=['POST'])
+user_api.add_url_rule(rule='/update-password', view_func=updatePassword, methods=['POST'])
