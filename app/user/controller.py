@@ -127,5 +127,28 @@ def voteFeed():
         traceback.print_exc()
         db.session.rollback()
         return jsonify({"error": "Couldn't vote feed"}), 500
+    
+def findUser():
+    user_email = request.args.get('email')
+
+    try:
+        user = db.session.query(User).filter_by(email=user_email).one_or_none()
+        if not user:
+            return jsonify({"error": "Invalid email address"}), 400
+        
+        otp = OTP.generate_otp(user.email)
+        if not otp:
+            return jsonify({"error": "Couldn't generate OTP"}), 500    
+        email_body = f"Hello {user.name},\n\nIt appears you are having a problem signing in.\nUse the below given 5 digit OTP to proceed-\n\n{otp.code}\n\nRegards,\nConnectKGP\nMade with ❤️ in KGP for KGP"
+        if send_email(user.email, "Welcome to ConnectKGP 👋", email_body):
+            return jsonify({"message": "OTP sent for verification", "otp_id": otp.id}), 200
+        else:
+            return jsonify({"error": "Couldn't send email"}), 500
+
+    except SQLAlchemyError as e:
+        print(e)
+        traceback.print_exc()
+        db.session.rollback()
+        return jsonify({"error": "Couldn't find user"}), 500
 
     
