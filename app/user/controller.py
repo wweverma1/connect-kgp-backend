@@ -140,7 +140,7 @@ def findUser():
         if not otp:
             return jsonify({"error": "Couldn't generate OTP"}), 500    
         email_body = f"Hello {user.name},\n\nIt appears you are having a problem signing in.\nUse the below given 5 digit OTP to proceed-\n\n{otp.code}\n\nRegards,\nConnectKGP\nMade with ❤️ in KGP for KGP"
-        if send_email(user.email, "Forgot Password? ConnectKGP", email_body):
+        if send_email(user.email, "Forgot your password? ConnectKGP", email_body):
             return jsonify({"message": "OTP sent for verification", "otp_id": otp.id}), 200
         else:
             return jsonify({"error": "Couldn't send email"}), 500
