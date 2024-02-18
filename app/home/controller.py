@@ -31,8 +31,9 @@ def getRating():
     total_ratings = len(ratings)
     if total_ratings > 0:
         avg_rating = sum(rating[0] for rating in ratings) / total_ratings
+        avg_rating_rounded = round(avg_rating, 1)
     else:
-        avg_rating = 0
+        avg_rating_rounded = 0
 
-    response["avg_rating"] = avg_rating
+    response["avg_rating"] = avg_rating_rounded
     return jsonify(response), 200
