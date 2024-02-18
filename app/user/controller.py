@@ -141,7 +141,7 @@ def findUser():
             return jsonify({"error": "Couldn't generate OTP"}), 500    
         email_body = f"Hello {user.name},\n\nIt appears you are having a problem signing in.\nUse the below given 5 digit OTP to proceed-\n\n{otp.code}\n\nRegards,\nConnectKGP\nMade with ❤️ in KGP for KGP"
         if send_email(user.email, "Forgot your password? ConnectKGP", email_body):
-            return jsonify({"message": "OTP sent for verification", "otp_id": otp.id}), 200
+            return jsonify({"message": "OTP sent for verification", "otp_id": otp.id, "user_id": user.id}), 200
         else:
             return jsonify({"error": "Couldn't send email"}), 500
 
@@ -150,5 +150,14 @@ def findUser():
         traceback.print_exc()
         db.session.rollback()
         return jsonify({"error": "Couldn't find user"}), 500
-
     
+def verifyUser():
+    otp_id = request.form['otp_id']
+    user_otp = request.form['user_otp']
+
+    otp = db.session.query(OTP).filter_by(id=otp_id).first()
+    
+    if otp and otp.expiry >= datetime.utcnow() and otp.code == user_otp:
+        return jsonify({"message": "otp validated"}), 200
+    else:
+        return jsonify({"error": "Incorrect OTP, Unable to Verify"}), 400
