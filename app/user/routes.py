@@ -6,7 +6,8 @@ from app.user.controller import (
     verify,
     getFeeds,
     postFeed, 
-    voteFeed
+    voteFeed,
+    findUser
 )
 
 user_api = Blueprint('user', __name__)
@@ -17,3 +18,4 @@ user_api.add_url_rule(rule='/signup-verify-email', view_func=verify, methods=['P
 user_api.add_url_rule(rule='/feeds', view_func=getFeeds, methods=['GET'])
 user_api.add_url_rule(rule='/feed', view_func=postFeed, methods=['POST'])
 user_api.add_url_rule(rule='/feed/vote', view_func=voteFeed, methods=['POST'])
+user_api.add_url_rule(rule='/find-user', view_func=findUser, methods=['GET'])
