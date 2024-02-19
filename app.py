@@ -11,16 +11,12 @@ socketio = SocketIO(app, cors_allowed_origins='*')
 idleUsers = set()
 idleAudioUsers = set()
 matches = {}
+userInfo = {}
 
 class UserData:
-    def __init__(self, user_id, chat_type, uid):
-        self.user_id = user_id
+    def __init__(self, chat_type, uid):
         self.chat_type = chat_type
         self.uid = uid
-
-def get_user_data(user_id):
-    user_data_dict = session.get('user_data', {})
-    return user_data_dict.get(user_id)
 
 def handle_idle(user_id, chatType):
     global idleUsers
@@ -50,17 +46,20 @@ def handle_idle(user_id, chatType):
                 socketio.emit('match', {'user_id': matched_user_1}, to=matched_user_2)
 
 @socketio.on('connection')
-def handle_connection(chatType, uid):
+def handle_connection(data):
     global idleUsers
     global idleAudioUsers
     global matches
+    global userInfo
 
     user_id = request.sid
 
+    chatType = data['chat-type']
+
     print("** user joined **\t", user_id, chatType)
-    
-    user_data = UserData(user_id, chatType, uid)
-    session['user_data'] = {user_data.user_id: user_data}
+
+    value_user_data = UserData(chatType, data['uid'])
+    userInfo[user_id] = value_user_data
     
     if chatType == "voice":
         if idleAudioUsers:
@@ -109,10 +108,12 @@ def handle_disconnect():
     global idleUsers
     global matches
     global idleAudioUsers
+    global userInfo
 
     user_id = request.sid
-    user_data = get_user_data(user_id)
+    user_data = userInfo[user_id]
     chatType = user_data.chat_type
+    del userInfo[user_id]
 
     print("** user left **\t", user_id, chatType)
 
@@ -139,11 +140,13 @@ def handle_disconnect():
 
 @socketio.on('report')
 def handle_report():
+    global matches
+    global userInfo
+
     user_id = request.sid
     match_id = matches[user_id]
-    report_user_data = get_user_data(match_id)
-    print(report_user_data)
-    print("reporting user: ", report_user_data.uid)
+    report_user_data = userInfo[match_id]
+
     user = db.session.query(User).filter_by(id=report_user_data.uid).one_or_none()
     if user:
         try:
@@ -153,6 +156,7 @@ def handle_report():
             print(e)
             traceback.print_exc()
             db.session.rollback()
+
     
 @socketio.on('shuffleCall')
 def shuffleCall():
