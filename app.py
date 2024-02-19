@@ -112,7 +112,7 @@ def handle_disconnect():
 
     user_id = request.sid
     user_data = get_user_data(user_id)
-    chatType = user_data.get('chat_type', None)
+    chatType = user_data.chat_type
 
     print("** user left **\t", user_id, chatType)
 
