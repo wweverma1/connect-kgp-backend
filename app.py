@@ -86,14 +86,14 @@ def handle_connection(data):
 @socketio.on('callUser')
 def handle_call_user(signal):
     global matches 
-    print('received call from ', request.sid)
+    
     match_id = matches[request.sid]
     socketio.emit('callUser', { 'signal': signal, 'match_id': match_id }, to=matches[request.sid])
 
 @socketio.on('answerCall')
 def handle_answer_call(signal):
     global matches
-    print('received answered by ', request.sid)
+    
     socketio.emit('callAccepted', signal, to=matches[request.sid])
 
 @socketio.on('message')
@@ -135,8 +135,6 @@ def handle_disconnect():
             del matches[user_id]
             del matches[match_id]
             handle_idle(match_id, chatType)
-    else:
-        print("invalid chat type")
 
 @socketio.on('report')
 def handle_report():
