@@ -136,5 +136,19 @@ def handle_report(user_id):
         traceback.print_exc()
         db.session.rollback()
     
+@socketio.on('shuffleCall')
+def shuffleCall():
+    global idleUsers
+    global matches
+    global idleAudioUsers
+
+    user_id = request.sid
+    match_id = matches[user_id]
+    socketio.emit('unmatch', to=match_id)
+    del matches[user_id]
+    del matches[match_id]
+    handle_idle(match_id, 'voice')
+    handle_idle(user_id, 'voice')
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
