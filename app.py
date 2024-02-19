@@ -142,6 +142,7 @@ def handle_report():
     user_id = request.sid
     match_id = matches[user_id]
     report_user_data = get_user_data(match_id)
+    print("reporting user: ", report_user_data.uid)
     user = db.session.query(User).filter_by(id=report_user_data.uid).one_or_none()
     if user:
         try:
