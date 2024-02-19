@@ -12,6 +12,16 @@ idleUsers = set()
 idleAudioUsers = set()
 matches = {}
 
+class UserData:
+    def __init__(self, user_id, chat_type, uid):
+        self.user_id = user_id
+        self.chat_type = chat_type
+        self.uid = uid
+
+def get_user_data(user_id):
+    user_data_dict = session.get('user_data', {})
+    return user_data_dict.get(user_id)
+
 def handle_idle(user_id, chatType):
     global idleUsers
     global idleAudioUsers
@@ -40,7 +50,7 @@ def handle_idle(user_id, chatType):
                 socketio.emit('match', {'user_id': matched_user_1}, to=matched_user_2)
 
 @socketio.on('connection')
-def handle_connection(chatType):
+def handle_connection(chatType, uid):
     global idleUsers
     global idleAudioUsers
     global matches
@@ -48,7 +58,9 @@ def handle_connection(chatType):
     user_id = request.sid
 
     print("** user joined **\t", user_id, chatType)
-    session['user_data'] = {'user_id': user_id, 'chat_type': chatType}
+    
+    user_data = UserData(user_id, chatType, uid)
+    session['user_data'] = {user_data.user_id: user_data}
     
     if chatType == "voice":
         if idleAudioUsers:
@@ -99,7 +111,7 @@ def handle_disconnect():
     global idleAudioUsers
 
     user_id = request.sid
-    user_data = session.get('user_data', {})
+    user_data = get_user_data(user_id)
     chatType = user_data.get('chat_type', None)
 
     print("** user left **\t", user_id, chatType)
@@ -113,7 +125,7 @@ def handle_disconnect():
             del matches[user_id]
             del matches[match_id]
             handle_idle(match_id, chatType)
-    else:
+    elif chatType == "text":
         if user_id in idleUsers:
             idleUsers.remove(user_id)
         else:
@@ -122,19 +134,23 @@ def handle_disconnect():
             del matches[user_id]
             del matches[match_id]
             handle_idle(match_id, chatType)
+    else:
+        print("invalid chat type")
 
 @socketio.on('report')
-def handle_report(user_id):
-    user = db.session.query(User).filter_by(id=user_id).one_or_none()
-    if not user:
-        return
-    try:
-        user.rating -= 1
-        db.session.commit()
-    except SQLAlchemyError as e:
-        print(e)
-        traceback.print_exc()
-        db.session.rollback()
+def handle_report():
+    user_id = request.sid
+    match_id = matches[user_id]
+    report_user_data = get_user_data(match_id)
+    user = db.session.query(User).filter_by(id=report_user_data.uid).one_or_none()
+    if user:
+        try:
+            user.rating -= 1
+            db.session.commit()
+        except SQLAlchemyError as e:
+            print(e)
+            traceback.print_exc()
+            db.session.rollback()
     
 @socketio.on('shuffleCall')
 def shuffleCall():
