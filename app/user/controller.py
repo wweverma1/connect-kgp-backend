@@ -47,13 +47,12 @@ def verify():
     name = request.form['name']
     email = request.form['email']
     password = request.form['password']
-    dob = request.form['birthdate']
     
     otp = db.session.query(OTP).filter_by(id=otp_id, created_for=email).first()
     
     if otp and otp.expiry >= datetime.utcnow() and otp.code == user_otp:
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        user = User.create_user(name, email, dob, hashed_password)
+        user = User.create_user(name, email, hashed_password)
         if not user:
             return jsonify({"error": "Some error occured while creating account"}), 500
         return jsonify({"user_id": user.id}), 200
