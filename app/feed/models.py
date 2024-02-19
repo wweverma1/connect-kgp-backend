@@ -18,16 +18,18 @@ class Feed(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime, default=datetime.now())
     content = db.Column(db.Text, nullable=False)
+    icon = db.Column(db.String(1), nullable=False)
     rating = db.Column(db.Integer, default=0)
     liked_by = db.Column(MutableList.as_mutable(ARRAY(db.Integer)), default=[])
     disliked_by = db.Column(MutableList.as_mutable(ARRAY(db.Integer)), default=[])
 
     @staticmethod
-    def post_feed(content):
+    def post_feed(content, icon):
         try:
             feed = Feed(
                 created_at=datetime.now(),
                 content=content,
+                icon=icon,
                 rating=0,
                 liked_by=[],
                 disliked_by=[]

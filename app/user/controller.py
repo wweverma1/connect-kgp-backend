@@ -68,6 +68,7 @@ def getFeeds():
             'id': feed.id,
             'created_at': feed.created_at,
             'content': feed.content,
+            'icon': feed.icon,
             'rating': feed.rating,
             'liked_by': feed.liked_by,
             'disliked_by': feed.disliked_by
@@ -78,8 +79,9 @@ def getFeeds():
 
 def postFeed():
     content = request.form['content']
+    icon = request.form['icon']
 
-    feed = Feed.post_feed(content.strip())
+    feed = Feed.post_feed(content.strip(), icon)
     if not feed:
         return jsonify({"error": "Some error occured while posting your status"}), 500
     return jsonify({"message": "Status posted"}), 200
