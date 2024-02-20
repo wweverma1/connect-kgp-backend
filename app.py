@@ -56,7 +56,7 @@ def handle_connection(data):
 
     chatType = data['chat-type']
 
-    print("** user joined **\t", user_id, chatType)
+    print("** user joined **\t", user_id, chatType, data['uid'])
 
     value_user_data = UserData(chatType, data['uid'])
     userInfo[user_id] = value_user_data
