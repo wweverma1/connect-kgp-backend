@@ -13,8 +13,8 @@ import traceback
 from sqlalchemy.exc import SQLAlchemyError
 
 def signup():
-    name = request.form['name']
-    email = request.form['email']
+    name = request.form['name'].strip()
+    email = request.form['email'].strip()
 
     is_email_registered = db.session.query(User).filter_by(email=email).count()
     if is_email_registered != 0:
@@ -23,14 +23,14 @@ def signup():
     otp = OTP.generate_otp(email)
     if not otp:
         return jsonify({"error": "Couldn't generate OTP"}), 500    
-    email_body = f"Hello {name},\n\nWe are glad to have you on board.\nUse the below given 5 digit OTP for completing your registration-\n\n{otp.code}\n\nRegards,\nConnectKGP\nMade with ❤️ in KGP for KGP"
+    email_body = f"Hello {name.split()[0].capitalize()},\n\nWe are glad to have you on board.\nUse the below given 5 digit OTP for completing your registration-\n\n{otp.code}\n\nRegards 🤗\nConnectKGP\nMade with ❤️ in KGP for KGP"
     if send_email(email, "Welcome to ConnectKGP 👋", email_body):
         return jsonify({"message": "OTP sent for verification", "otp_id": otp.id}), 200
     else:
         return jsonify({"error": "Couldn't send email"}), 500
 
 def signin():
-    email = request.form['email']
+    email = request.form['email'].strip()
     password = request.form['password']
     
     user = db.session.query(User).filter(User.email == email).one_or_none()
@@ -44,8 +44,8 @@ def signin():
 def verify():
     otp_id = request.form['otp_id']
     user_otp = request.form['user_otp']
-    name = request.form['name']
-    email = request.form['email']
+    name = request.form['name'].strip().title()
+    email = request.form['email'].strip()
     password = request.form['password']
     
     otp = db.session.query(OTP).filter_by(id=otp_id, created_for=email).first()
@@ -140,7 +140,7 @@ def findUser():
         otp = OTP.generate_otp(user.email)
         if not otp:
             return jsonify({"error": "Couldn't generate OTP"}), 500    
-        email_body = f"Hello {user.name},\n\nIt appears you are having a problem signing in.\nUse the below given 5 digit OTP to proceed-\n\n{otp.code}\n\nRegards,\nConnectKGP\nMade with ❤️ in KGP for KGP"
+        email_body = f"Hello {user.name.split()[0].capitalize()},\n\nIt appears you are having a problem signing in.\nUse the below given 5 digit OTP to proceed-\n\n{otp.code}\n\nRegards 🤗\nConnectKGP\nMade with ❤️ in KGP for KGP"
         if send_email(user.email, "Forgot your password? ConnectKGP", email_body):
             return jsonify({"message": "OTP sent for verification", "otp_id": otp.id, "user_id": user.id}), 200
         else:
