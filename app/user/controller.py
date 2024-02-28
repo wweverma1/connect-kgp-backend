@@ -182,4 +182,22 @@ def updatePassword():
         db.session.rollback()
         return jsonify({"error": f"Database error: {str(e)}"}), 500
 
+def reportUser():
+    user_id = request.args.get('uid')
+
+    user = db.session.query(User).filter_by(id=user_id).one_or_none()
+    if user:
+        try:
+            user.rating -= 1
+            db.session.commit()
+            return jsonify({"message": "user reported"}), 200
+        except SQLAlchemyError as e:
+            print(e)
+            traceback.print_exc()
+            db.session.rollback()
+            return jsonify({"error": "couldn't report user"}), 500
+    else:
+        return jsonify({"error": "user not found"}), 400
+
+
 
