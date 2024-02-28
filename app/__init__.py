@@ -4,7 +4,6 @@ import os
 # Related third party imports
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import text
 from dotenv import load_dotenv
 from flask_cors import CORS
 
