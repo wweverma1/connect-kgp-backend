@@ -21,6 +21,9 @@ def signup():
     name = request.form['name'].strip()
     email = request.form['email'].strip()
 
+    if not email.endswith("iitkgp.ac.in"):
+        return jsonify({"error": "Please use your kgp email address"}), 400
+    
     is_email_registered = db.session.query(User).filter_by(email=email).count()
     if is_email_registered != 0:
         return jsonify({"error": "An account already exists with this email"}), 400
