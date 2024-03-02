@@ -245,6 +245,26 @@ def getFriends():
             return jsonify({'error': 'user not found'}), 400
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+def removeFriend():
+    uid = request.form['user_id']
+    fid = request.form['friend_id']
+
+    user = db.session.query(User).filter_by(id=uid).one_or_none()
+    friend = db.session.query(User).filter_by(id=fid).one_or_none()
+    if user and friend:
+        try:
+            user.friends.remove(fid)
+            friend.friends.remove(uid)
+            db.session.commit()
+            return jsonify({"message": "friend removed"}), 200
+        except SQLAlchemyError as e:
+            print(e)
+            traceback.print_exc()
+            db.session.rollback()
+            return jsonify({"error": "couldn't remove friend"}), 500
+    else:
+        return jsonify({"error": "user/ users not found"}), 400
 
 
 
