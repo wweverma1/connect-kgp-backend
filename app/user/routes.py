@@ -10,7 +10,9 @@ from app.user.controller import (
     findUser,
     verifyUser,
     updatePassword,
-    reportUser
+    reportUser,
+    addFriend,
+    getFriends
 )
 
 user_api = Blueprint('user', __name__)
@@ -25,3 +27,5 @@ user_api.add_url_rule(rule='/find-user', view_func=findUser, methods=['GET'])
 user_api.add_url_rule(rule='/password-verify-email', view_func=verifyUser, methods=['POST'])
 user_api.add_url_rule(rule='/update-password', view_func=updatePassword, methods=['POST'])
 user_api.add_url_rule(rule='/report-user', view_func=reportUser, methods=['GET'])
+user_api.add_url_rule(rule='/add-friend', view_func=addFriend, methods=['POST'])
+user_api.add_url_rule(rule='/friends', view_func=getFriends, methods=['GET'])

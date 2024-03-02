@@ -2,7 +2,9 @@
 import traceback
 
 # Related third party imports
+from sqlalchemy import ARRAY
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.mutable import MutableList
 
 # Local app specific imports
 from app import db
@@ -15,6 +17,7 @@ class User(db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.LargeBinary, nullable=False)
     rating = db.Column(db.Integer, nullable=False, default=0)
+    friends = db.Column(MutableList.as_mutable(ARRAY(db.Integer)), default=[])
 
     @staticmethod
     def create_user(name, email, password):
@@ -23,7 +26,8 @@ class User(db.Model):
                 name=name, 
                 email=email, 
                 password=password,
-                rating=0
+                rating=0,
+                friends=[]
             )
             db.session.add(user)
             db.session.commit()
