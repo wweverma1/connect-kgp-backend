@@ -12,6 +12,7 @@ from datetime import datetime
 import traceback
 from sqlalchemy.exc import SQLAlchemyError
 import requests
+from datetime import date, datetime
 
 def startCC():
     cc_url = "https://connect-kgp-cc.onrender.com/"
@@ -70,7 +71,9 @@ def verify():
         return jsonify({"error": "Incorrect OTP, Unable to Verify"}), 400
     
 def getFeeds():
-    feeds = db.session.query(Feed).all()
+    today = date.today()
+
+    feeds = db.session.query(Feed).filter(db.func.DATE(Feed.created_at) == today).all()
     feeds_list = []
 
     for feed in feeds:
