@@ -3,6 +3,7 @@ from flask import (
     jsonify
 )
 import bcrypt
+from sqlalchemy import desc
 from app import db
 from app.user.models import User
 from app.otp.models import OTP
@@ -70,42 +71,50 @@ def verify():
     else:
         return jsonify({"error": "Incorrect OTP, Unable to Verify"}), 400
     
+# def getFeeds():
+#     today = date.today()
+
+#     feeds = db.session.query(Feed).filter(db.func.DATE(Feed.created_at) == today).all()
+#     feeds_list = []
+
+#     for feed in feeds:
+#         feed_data = {
+#             'id': feed.id,
+#             'created_at': feed.created_at,
+#             'content': feed.content,
+#             'icon': feed.icon,
+#             'liked_by': feed.liked_by,
+#             'disliked_by': feed.disliked_by
+#         }
+#         feeds_list.append(feed_data)
+
+#     return jsonify({"feeds": feeds_list}), 200
+
+def get_feed_data(feed):
+    sorted_children = sorted(feed.children, key=lambda child: child.created_at)
+    sorted_children_data = [get_feed_data(child) for child in sorted_children]
+
+    return {
+        "id": feed.id,
+        "created_at": feed.created_at,
+        "content": feed.content,
+        "icon": feed.icon,
+        "liked_by": feed.liked_by,
+        "disliked_by": feed.disliked_by,
+        "children": sorted_children_data
+    }
+
 def getFeeds():
     today = date.today()
+    feeds = (
+        db.session.query(Feed)
+        .filter(db.func.DATE(Feed.created_at) == today, Feed.parent_feed_id.is_(None))
+        .order_by(Feed.created_at)
+        .all()
+    )
 
-    feeds = db.session.query(Feed).filter(db.func.DATE(Feed.created_at) == today).all()
-    feeds_dict = {feed.id: feed for feed in feeds}
-    nested_feeds = {}
-
-    for feed in feeds:
-        # Check if the feed has a parent
-        if feed.parent_feed_id:
-            # If the parent feed is present, add the current feed to the parent's 'children' list
-            parent_feed_id = feed.parent_feed_id
-            if parent_feed_id in feeds_dict:
-                if not hasattr(feeds_dict[parent_feed_id], 'children'):
-                    feeds_dict[parent_feed_id].children = []
-                feeds_dict[parent_feed_id].children.append(feed)
-            else:
-                # If the parent feed is not in feeds_dict, create a new entry with an empty 'children' list
-                nested_feeds[parent_feed_id] = {'children': [feed]}
-        else:
-            # If the feed has no parent, add it directly to the nested_feeds
-            nested_feeds[feed.id] = {
-                'id': feed.id,
-                'created_at': feed.created_at,
-                'content': feed.content,
-                'icon': feed.icon,
-                'rating': feed.rating,
-                'liked_by': feed.liked_by,
-                'disliked_by': feed.disliked_by,
-                'children': []
-            }
-
-    # Convert nested_feeds dictionary to a list
-    feeds_list = list(nested_feeds.values())
-
-    return jsonify({"feeds": feeds_list}), 200
+    response_data = {"feeds": [get_feed_data(feed) for feed in feeds]}
+    return jsonify(response_data)
 
 def postFeed():
     user_id = request.form['uid']
@@ -131,24 +140,18 @@ def voteFeed():
             if user_id in feed.disliked_by:
                 feed.disliked_by.remove(user_id)
                 feed.liked_by.append(user_id)
-                feed.rating += 2
             elif user_id in feed.liked_by:
                 feed.liked_by.remove(user_id)
-                feed.rating -= 1
             else:
                 feed.liked_by.append(user_id)
-                feed.rating += 1
         elif vote == -1:
             if user_id in feed.liked_by:
                 feed.liked_by.remove(user_id)
                 feed.disliked_by.append(user_id)
-                feed.rating -= 2
             elif user_id in feed.disliked_by:
                 feed.disliked_by.remove(user_id)
-                feed.rating += 1
             else:
                 feed.disliked_by.append(user_id)
-                feed.rating -= 1
         else:
             return jsonify({"error": "Invalid vote value"}), 400
 

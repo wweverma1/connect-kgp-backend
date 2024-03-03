@@ -21,7 +21,6 @@ class Feed(db.Model):
     created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     content = db.Column(db.Text, nullable=False)
     icon = db.Column(db.String(1), nullable=False)
-    rating = db.Column(db.Integer, default=0)
     liked_by = db.Column(MutableList.as_mutable(ARRAY(db.Integer)), default=[])
     disliked_by = db.Column(MutableList.as_mutable(ARRAY(db.Integer)), default=[])
     parent_feed_id = db.Column(db.Integer, db.ForeignKey('feed.id'))
@@ -36,7 +35,6 @@ class Feed(db.Model):
                 created_by=user_id,
                 content=content,
                 icon=icon,
-                rating=0,
                 liked_by=[],
                 disliked_by=[],
                 parent_feed_id=parent_feed_id
