@@ -76,27 +76,43 @@ def getFeeds():
     feeds = db.session.query(Feed).filter(db.func.DATE(Feed.created_at) == today).all()
     feeds_list = []
 
+    # Create a dictionary to store feeds by their IDs
+    feeds_dict = {feed.id: feed for feed in feeds}
+
     for feed in feeds:
-        feed_data = {
-            'id': feed.id,
-            'created_at': feed.created_at,
-            'content': feed.content,
-            'icon': feed.icon,
-            'rating': feed.rating,
-            'liked_by': feed.liked_by,
-            'disliked_by': feed.disliked_by
-        }
-        feeds_list.append(feed_data)
+        # Check if the feed has a parent
+        if feed.parent_feed_id:
+            # If the parent feed is present, add the current feed to the parent's 'children' list
+            parent_feed = feeds_dict.get(feed.parent_feed_id)
+            if parent_feed:
+                if not hasattr(parent_feed, 'children'):
+                    parent_feed.children = []
+                parent_feed.children.append(feed)
+        else:
+            # If the feed has no parent, add it directly to the feeds_list
+            feed_data = {
+                'id': feed.id,
+                'created_at': feed.created_at,
+                'content': feed.content,
+                'icon': feed.icon,
+                'rating': feed.rating,
+                'liked_by': feed.liked_by,
+                'disliked_by': feed.disliked_by,
+                'children': getattr(feed, 'children', [])  # Include children if present
+            }
+            feeds_list.append(feed_data)
 
     return jsonify({"feeds": feeds_list}), 200
 
 def postFeed():
+    user_id = request.form['uid']
     content = request.form['content']
     icon = request.form['icon']
+    parent_feed_id = request.form.get('parent_feed_id')
 
-    feed = Feed.post_feed(content.strip(), icon)
+    feed = Feed.post_feed(user_id, content.strip(), icon, parent_feed_id)
     if not feed:
-        return jsonify({"error": "Some error occured while posting your status"}), 500
+        return jsonify({"error": "Some error occurred while posting your status"}), 500
     return jsonify({"message": "Status posted"}), 200
 
 def voteFeed():
