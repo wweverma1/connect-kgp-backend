@@ -25,7 +25,7 @@ class Feed(db.Model):
     disliked_by = db.Column(MutableList.as_mutable(ARRAY(db.Integer)), default=[])
     parent_feed_id = db.Column(db.Integer, db.ForeignKey('feed.id'))
     
-    parent_feed = relationship('Feed', remote_side=[id])
+    parent_feed = relationship('Feed', remote_side=[id], backref='children')
 
     @staticmethod
     def post_feed(user_id, content, icon, parent_feed_id=None):
