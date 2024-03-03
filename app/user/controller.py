@@ -74,23 +74,24 @@ def getFeeds():
     today = date.today()
 
     feeds = db.session.query(Feed).filter(db.func.DATE(Feed.created_at) == today).all()
-    feeds_list = []
-
-    # Create a dictionary to store feeds by their IDs
     feeds_dict = {feed.id: feed for feed in feeds}
+    nested_feeds = {}
 
     for feed in feeds:
         # Check if the feed has a parent
         if feed.parent_feed_id:
             # If the parent feed is present, add the current feed to the parent's 'children' list
-            parent_feed = feeds_dict.get(feed.parent_feed_id)
-            if parent_feed:
-                if not hasattr(parent_feed, 'children'):
-                    parent_feed.children = []
-                parent_feed.children.append(feed)
+            parent_feed_id = feed.parent_feed_id
+            if parent_feed_id in feeds_dict:
+                if not hasattr(feeds_dict[parent_feed_id], 'children'):
+                    feeds_dict[parent_feed_id].children = []
+                feeds_dict[parent_feed_id].children.append(feed)
+            else:
+                # If the parent feed is not in feeds_dict, create a new entry with an empty 'children' list
+                nested_feeds[parent_feed_id] = {'children': [feed]}
         else:
-            # If the feed has no parent, add it directly to the feeds_list
-            feed_data = {
+            # If the feed has no parent, add it directly to the nested_feeds
+            nested_feeds[feed.id] = {
                 'id': feed.id,
                 'created_at': feed.created_at,
                 'content': feed.content,
@@ -98,9 +99,11 @@ def getFeeds():
                 'rating': feed.rating,
                 'liked_by': feed.liked_by,
                 'disliked_by': feed.disliked_by,
-                'children': getattr(feed, 'children', [])  # Include children if present
+                'children': []
             }
-            feeds_list.append(feed_data)
+
+    # Convert nested_feeds dictionary to a list
+    feeds_list = list(nested_feeds.values())
 
     return jsonify({"feeds": feeds_list}), 200
 
