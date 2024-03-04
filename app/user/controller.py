@@ -23,8 +23,8 @@ def signup():
     name = request.form['name'].strip()
     email = request.form['email'].strip()
 
-    if not email.endswith("iitkgp.ac.in"):
-        return jsonify({"error": "Please use your kgp email address"}), 400
+    if not email.endswith("iitkgp.ac.in") or email.endswith("gmail.com"):
+        return jsonify({"error": "Please use an appropriate email address"}), 400
     
     is_email_registered = db.session.query(User).filter_by(email=email).count()
     if is_email_registered != 0:
@@ -70,25 +70,6 @@ def verify():
         return jsonify({"user_id": user.id}), 200
     else:
         return jsonify({"error": "Incorrect OTP, Unable to Verify"}), 400
-    
-# def getFeeds():
-#     today = date.today()
-
-#     feeds = db.session.query(Feed).filter(db.func.DATE(Feed.created_at) == today).all()
-#     feeds_list = []
-
-#     for feed in feeds:
-#         feed_data = {
-#             'id': feed.id,
-#             'created_at': feed.created_at,
-#             'content': feed.content,
-#             'icon': feed.icon,
-#             'liked_by': feed.liked_by,
-#             'disliked_by': feed.disliked_by
-#         }
-#         feeds_list.append(feed_data)
-
-#     return jsonify({"feeds": feeds_list}), 200
 
 def get_feed_data(feed):
     sorted_children = sorted(feed.children, key=lambda child: child.created_at)
