@@ -23,7 +23,7 @@ def signup():
     name = request.form['name'].strip()
     email = request.form['email'].strip()
 
-    if not email.endswith("iitkgp.ac.in") or not email.endswith("gmail.com"):
+    if not email.endswith("iitkgp.ac.in") and not email.endswith("gmail.com"):
         return jsonify({"error": "Please use an appropriate email address"}), 400
     
     is_email_registered = db.session.query(User).filter_by(email=email).count()
