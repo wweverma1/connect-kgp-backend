@@ -215,13 +215,20 @@ def reportUser():
     else:
         return jsonify({"error": "user not found"}), 400
     
+def are_friends(user, friend_id):
+    return db.session.query(UserFriends).filter_by(user_id=user.id, friend_id=friend_id).first() is not None
+
 def addFriend():
     uid = request.form['user_id']
     fid = request.form['friend_id']
 
     user = db.session.query(User).filter_by(id=uid).one_or_none()
     friend = db.session.query(User).filter_by(id=fid).one_or_none()
+
     if user and friend:
+        if are_friends(user, fid) or are_friends(friend, uid):
+            return jsonify({"message": "You are already friends with this user"}), 400
+
         try:
             user.friends.append(fid)
             friend.friends.append(uid)
@@ -233,7 +240,7 @@ def addFriend():
             db.session.rollback()
             return jsonify({"error": "couldn't add friend"}), 500
     else:
-        return jsonify({"error": "user/ users not found"}), 400
+        return jsonify({"error": "user/users not found"}), 400
     
 def getFriends():
     user_id = request.args.get('uid')
