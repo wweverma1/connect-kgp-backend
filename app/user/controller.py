@@ -16,7 +16,7 @@ import requests
 from datetime import date, datetime
 
 def startCC():
-    cc_url = "http://localhost:50001/"
+    cc_url = "http://localhost:5001/"
     cc_response = requests.get(cc_url)
     
 def signup():
