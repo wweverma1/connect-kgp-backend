@@ -16,7 +16,7 @@ import requests
 from datetime import date, datetime
 
 def startCC():
-    cc_url = "http://localhost:5001/"
+    cc_url = "https://connect-kgp-cc.onrender.com/"
     cc_response = requests.get(cc_url)
     
 def signup():
