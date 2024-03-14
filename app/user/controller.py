@@ -14,10 +14,6 @@ import traceback
 from sqlalchemy.exc import SQLAlchemyError
 import requests
 from datetime import date, datetime
-
-def startCC():
-    cc_url = "https://connect-kgp-cc.onrender.com/"
-    cc_response = requests.get(cc_url)
     
 def signup():
     name = request.form['name'].strip()
@@ -40,7 +36,6 @@ def signup():
         return jsonify({"error": "Couldn't send email"}), 500
 
 def signin():
-    startCC()
     email = request.form['email'].strip()
     password = request.form['password']
     
@@ -53,7 +48,6 @@ def signin():
         return jsonify({"error": "Incorrect Password, Unable to Login"}), 400
     
 def verify():
-    startCC()
     otp_id = request.form['otp_id']
     user_otp = request.form['user_otp']
     name = request.form['name'].strip().title()
