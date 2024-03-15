@@ -41,7 +41,7 @@ def signup():
             </div>
             <hr>
             <div>
-                <p>Hello {name.split()[0].capitalize()} 👋,</p>
+                <p>Hello {name} 👋,</p>
                 <p>We are glad to have you on-board.</p>
                 <p>Use the below given 5 digit OTP for completing your registration-</p>
                 <div style="text-align: center; margin: 20px">
@@ -186,7 +186,7 @@ def findUser():
                 </div>
                 <hr>
                 <div>
-                    <p>Hello {user.name.split()[0].capitalize()} 👋,</p>
+                    <p>Hello {user.name} 👋,</p>
                     <p>It appears you are having a problem signing in.</p>
                     <p>Use the below given 5 digit OTP to proceed-</p>
                     <div style="text-align: center; margin: 20px">
