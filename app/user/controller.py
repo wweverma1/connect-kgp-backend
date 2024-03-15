@@ -43,7 +43,7 @@ def signin():
     if not user:
         return jsonify({"error": "No account registered with this email address"}), 400
     if bcrypt.checkpw(password.encode('utf-8'), user.password):
-        return jsonify({"user_id": user.id}), 200
+        return jsonify({"user_id": user.id, "username": user.name }), 200
     else:
         return jsonify({"error": "Incorrect Password, Unable to Login"}), 400
     
@@ -61,7 +61,7 @@ def verify():
         user = User.create_user(name, email, hashed_password)
         if not user:
             return jsonify({"error": "Some error occured while creating account"}), 500
-        return jsonify({"user_id": user.id}), 200
+        return jsonify({"user_id": user.id, "username": user.name }), 200
     else:
         return jsonify({"error": "Incorrect OTP, Unable to Verify"}), 400
 
