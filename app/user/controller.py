@@ -28,8 +28,32 @@ def signup():
     
     otp = OTP.generate_otp(email)
     if not otp:
-        return jsonify({"error": "Couldn't generate OTP"}), 500    
-    email_body = f"Hello {name.split()[0].capitalize()},\n\nWe are glad to have you on board.\nUse the below given 5 digit OTP for completing your registration-\n\n{otp.code}\n\nRegards 🤗\nConnectKGP\nMade with ❤️ in KGP for KGP"
+        return jsonify({"error": "Couldn't generate OTP"}), 500
+    email_body = f"""\
+        <html>
+        <body>
+            <div style="text-align: center;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 5px; margin: 1px 0">
+                    <img src='https://connectkgp.netlify.app/images/connectkgp.png' alt='connectkgp icon' style="height: 32px;" />
+                    <span style="font-weight: bold; font-size: 32px; color: #6559a2;">ConnectKGP</span>
+                </div>
+                <span style="font-size: 14px;">KGP ka apna pseudonymous social network</span>
+            </div>
+            <hr>
+            <div>
+                <p>Hello {name.split()[0].capitalize()} 👋,</p>
+                <p>We are glad to have you on-board.</p>
+                <p>Use the below given 5 digit OTP for completing your registration-</p>
+                <div style="text-align: center; margin: 20px">
+                    <span style="background-color: #6559a2; padding: 10px; color: white; letter-spacing: 5px;">{otp.code}</a>
+                </div>
+            </div>
+            <p>Regards 🤗<br><br>
+                <b style="color: #6559a2;">ConnectKGP</b><br>Made with ❤️ in KGP for KGP
+            </p>
+        </body>
+        </html>
+    """    
     if send_email(email, "Welcome to ConnectKGP 👋", email_body):
         return jsonify({"message": "OTP sent for verification", "otp_id": otp.id}), 200
     else:
@@ -149,8 +173,32 @@ def findUser():
         
         otp = OTP.generate_otp(user.email)
         if not otp:
-            return jsonify({"error": "Couldn't generate OTP"}), 500    
-        email_body = f"Hello {user.name.split()[0].capitalize()},\n\nIt appears you are having a problem signing in.\nUse the below given 5 digit OTP to proceed-\n\n{otp.code}\n\nRegards 🤗\nConnectKGP\nMade with ❤️ in KGP for KGP"
+            return jsonify({"error": "Couldn't generate OTP"}), 500   
+        email_body = f"""\
+            <html>
+            <body>
+                <div style="text-align: center;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 5px; margin: 1px 0">
+                        <img src='https://connectkgp.netlify.app/images/connectkgp.png' alt='connectkgp icon' style="height: 32px;" />
+                        <span style="font-weight: bold; font-size: 32px; color: #6559a2;">ConnectKGP</span>
+                    </div>
+                    <span style="font-size: 14px;">KGP ka apna pseudonymous social network</span>
+                </div>
+                <hr>
+                <div>
+                    <p>Hello {user.name.split()[0].capitalize()} 👋,</p>
+                    <p>It appears you are having a problem signing in.</p>
+                    <p>Use the below given 5 digit OTP to proceed-</p>
+                    <div style="text-align: center; margin: 20px">
+                        <span style="background-color: #6559a2; padding: 10px; color: white; letter-spacing: 5px;">{otp.code}</a>
+                    </div>
+                </div>
+                <p>Regards 🤗<br><br>
+                    <b style="color: #6559a2;">ConnectKGP</b><br>Made with ❤️ in KGP for KGP
+                </p>
+            </body>
+            </html>
+        """ 
         if send_email(user.email, "Forgot your password? ConnectKGP", email_body):
             return jsonify({"message": "OTP sent for verification", "otp_id": otp.id, "user_id": user.id}), 200
         else:
@@ -273,6 +321,41 @@ def removeFriend():
         print(e)
         traceback.print_exc()
         return jsonify({"error": "Invalid input"}), 400
+    
+def sendInvite():
+    username = request.form['username']
+    email = request.form['email'].strip()
+      
+    email_body = f"""\
+        <html>
+        <body>
+            <div style="text-align: center;">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 5px; margin: 1px 0">
+                    <img src='https://connectkgp.netlify.app/images/connectkgp.png' alt='connectkgp icon' style="height: 32px;" />
+                    <span style="font-weight: bold; font-size: 32px; color: #6559a2;">ConnectKGP</span>
+                </div>
+                <span style="font-size: 14px;">KGP ka apna pseudonymous social network</span>
+            </div>
+            <hr>
+            <div>
+                <p>Hello 👋,</p>
+                <p><b>{username}</b> has invited you to join <b style="color: #6559a2;">ConnectKGP</b>, KGP ka apna pseudonymous social network.</p>
+                <p>We're excited to have you join us!</p>
+                <p>To get started, just click the button below to connect with KGP-</p>
+                <div style="text-align: center; margin: 20px">
+                    <a href="https://connectkgp.netlify.app/" target="_blank" style="background-color: #6559a2; padding: 10px; color: white; text-decoration: none;">Accept Invite</a>
+                </div>
+            </div>
+            <p>Regards 🤗<br><br>
+                <b style="color: #6559a2;">ConnectKGP</b><br>Made with ❤️ in KGP for KGP
+            </p>
+        </body>
+        </html>
+    """
+    if send_email(email, "Yayy! You have been invited", email_body):
+        return jsonify({ "message": "invitation sent" }), 200
+    else:
+        return jsonify({"error": "Couldn't send invitation"}), 500
 
 
 

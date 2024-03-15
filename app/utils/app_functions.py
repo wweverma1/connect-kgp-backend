@@ -39,7 +39,7 @@ def send_email(recipient_email, subject, body):
         message['From'] = sender_email
         message['To'] = recipient_email
         message['Subject'] = subject
-        message.attach(MIMEText(body, 'plain'))
+        message.attach(MIMEText(body, 'html'))
 
         # Connect to the SMTP server and send the email
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
