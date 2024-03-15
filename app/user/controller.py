@@ -45,7 +45,7 @@ def signup():
                 <p>We are glad to have you on-board.</p>
                 <p>Use the below given 5 digit OTP for completing your registration-</p>
                 <div style="text-align: center; margin: 20px">
-                    <span style="background-color: #6559a2; padding: 10px; color: white; letter-spacing: 5px;">{otp.code}</a>
+                    <span style="font-weight: bold; background-color: #6559a2; padding: 10px; color: white; letter-spacing: 5px;">{otp.code}</a>
                 </div>
             </div>
             <p>Regards 🤗<br><br>
@@ -190,7 +190,7 @@ def findUser():
                     <p>It appears you are having a problem signing in.</p>
                     <p>Use the below given 5 digit OTP to proceed-</p>
                     <div style="text-align: center; margin: 20px">
-                        <span style="background-color: #6559a2; padding: 10px; color: white; letter-spacing: 5px;">{otp.code}</a>
+                        <span style="font-weight: bold; background-color: #6559a2; padding: 10px; color: white; letter-spacing: 5px;">{otp.code}</a>
                     </div>
                 </div>
                 <p>Regards 🤗<br><br>
@@ -343,7 +343,7 @@ def sendInvite():
                 <p>We're excited to have you join us!</p>
                 <p>To get started, just click the button below to connect with KGP-</p>
                 <div style="text-align: center; margin: 20px">
-                    <a href="https://connectkgp.netlify.app/" target="_blank" style="background-color: #6559a2; padding: 10px; color: white; text-decoration: none;">Accept Invite</a>
+                    <a href="https://connectkgp.netlify.app/" target="_blank" style="font-weight: bold; background-color: #6559a2; padding: 10px; color: white; text-decoration: none;">Accept Invite</a>
                 </div>
             </div>
             <p>Regards 🤗<br><br>
