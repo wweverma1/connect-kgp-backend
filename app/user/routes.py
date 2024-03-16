@@ -14,7 +14,8 @@ from app.user.controller import (
     addFriend,
     getFriends,
     removeFriend,
-    sendInvite
+    sendInvite,
+    verifyToken
 )
 
 user_api = Blueprint('user', __name__)
@@ -33,3 +34,4 @@ user_api.add_url_rule(rule='/add-friend', view_func=addFriend, methods=['POST'])
 user_api.add_url_rule(rule='/friends', view_func=getFriends, methods=['GET'])
 user_api.add_url_rule(rule='/remove-friend', view_func=removeFriend, methods=['POST'])
 user_api.add_url_rule(rule='/send-invite', view_func=sendInvite, methods=['POST'])
+user_api.add_url_rule(rule='/verify-token', view_func=verifyToken, methods=['GET'])

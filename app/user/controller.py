@@ -5,7 +5,7 @@ from flask import (
 import bcrypt
 from sqlalchemy import desc
 from app import db
-from app.user.models import User
+from app.user.models import User, Token
 from app.otp.models import OTP
 from app.feed.models import Feed
 from app.utils.app_functions import send_email
@@ -66,7 +66,11 @@ def signin():
     if not user:
         return jsonify({"error": "No account registered with this email address"}), 400
     if bcrypt.checkpw(password.encode('utf-8'), user.password):
-        return jsonify({"user_id": user.id, "username": user.name }), 200
+        access_token = Token.generate_and_add_token(user.id)
+        if access_token:
+            return jsonify({"user_id": user.id, "username": user.name, "access_token": access_token }), 200
+        else:
+            return jsonify({"error": "Login failed. Unable to generate access token"}), 400
     else:
         return jsonify({"error": "Incorrect Password, Unable to Login"}), 400
     
@@ -84,7 +88,11 @@ def verify():
         user = User.create_user(name, email, hashed_password)
         if not user:
             return jsonify({"error": "Some error occured while creating account"}), 500
-        return jsonify({"user_id": user.id, "username": user.name }), 200
+        access_token = Token.generate_and_add_token(user.id)
+        if access_token:
+            return jsonify({"user_id": user.id, "username": user.name, "access_token": access_token }), 200
+        else:
+            return jsonify({"error": "Sign up completed but unable to generate access token"}), 400
     else:
         return jsonify({"error": "Incorrect OTP, Unable to Verify"}), 400
 
@@ -233,7 +241,11 @@ def updatePassword():
 
         user.password = hashed_password
         db.session.commit()
-        return jsonify({"user_id": user_id}), 200
+        access_token = Token.generate_and_add_token(user.id)
+        if access_token:
+            return jsonify({"user_id": user.id, "username": user.name, "access_token": access_token }), 200
+        else:
+            return jsonify({"error": "Password updated but unable to generate access token"}), 400
 
     except Exception as e:
         db.session.rollback()
@@ -355,7 +367,24 @@ def sendInvite():
         return jsonify({ "message": "invitation sent" }), 200
     else:
         return jsonify({"error": "Couldn't send invitation"}), 500
+    
+def verifyToken():
+    access_token = request.args.get('access_token')
 
-
+    try:
+        token = db.session.query(Token).filter_by(token=access_token).one_or_none()
+        if token:
+            if token.valid_till > datetime.now():
+                user = db.session.query(User).filter_by(id=token.user_id).one_or_none()
+                if user:
+                    return jsonify({"user_id": user.id, "username": user.name, "access_token": access_token }), 200
+                else:
+                    return jsonify({"error": "Invalid token"}), 400
+            else:
+                return jsonify({"error": "Token expired"}), 401
+        else:
+            return jsonify({"error": "Invalid token"}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
