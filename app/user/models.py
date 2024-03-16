@@ -5,6 +5,7 @@ import traceback
 from sqlalchemy import ARRAY
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.mutable import MutableList
+from datetime import datetime
 
 # Local app specific imports
 from app import db
@@ -18,6 +19,7 @@ class User(db.Model):
     password = db.Column(db.LargeBinary, nullable=False)
     rating = db.Column(db.Integer, nullable=False, default=0)
     friends = db.Column(MutableList.as_mutable(ARRAY(db.Integer)), default=[])
+    created_at = db.Column(db.DateTime, default=datetime.now())
 
     @staticmethod
     def create_user(name, email, password):
@@ -27,7 +29,8 @@ class User(db.Model):
                 email=email, 
                 password=password,
                 rating=0,
-                friends=[]
+                friends=[],
+                created_at=datetime.now()
             )
             db.session.add(user)
             db.session.commit()

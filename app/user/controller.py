@@ -32,8 +32,8 @@ def signup():
         <html>
         <body>
             <div style="text-align: center;">
-                <div style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-                    <img src='https://connectkgp.netlify.app/images/connectkgp.png' alt='connectkgp icon' style="height: 32px;" />
+                <div style="margin: auto;">
+                    <img src='https://connectkgp.netlify.app/images/connectkgp.png' alt='connectkgp icon' style="height: 22px;" />
                     <span style="font-weight: bold; font-size: 32px; color: #6559a2;">ConnectKGP</span>
                 </div>
                 <span style="font-size: 14px;">KGP ka apna pseudonymous social network</span>
@@ -177,8 +177,8 @@ def findUser():
             <html>
             <body>
                 <div style="text-align: center;">
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-                        <img src='https://connectkgp.netlify.app/images/connectkgp.png' alt='connectkgp icon' style="height: 32px;" />
+                    <div style="margin: auto;">
+                        <img src='https://connectkgp.netlify.app/images/connectkgp.png' alt='connectkgp icon' style="height: 22px;" />
                         <span style="font-weight: bold; font-size: 32px; color: #6559a2;">ConnectKGP</span>
                     </div>
                     <span style="font-size: 14px;">KGP ka apna pseudonymous social network</span>
@@ -329,8 +329,8 @@ def sendInvite():
         <html>
         <body>
             <div style="text-align: center;">
-                <div style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-                    <img src='https://connectkgp.netlify.app/images/connectkgp.png' alt='connectkgp icon' style="height: 32px;" />
+                <div style="margin: auto;">
+                    <img src='https://connectkgp.netlify.app/images/connectkgp.png' alt='connectkgp icon' style="height: 22px;" />
                     <span style="font-weight: bold; font-size: 32px; color: #6559a2;">ConnectKGP</span>
                 </div>
                 <span style="font-size: 14px;">KGP ka apna pseudonymous social network</span>
