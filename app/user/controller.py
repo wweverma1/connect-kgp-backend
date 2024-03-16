@@ -13,7 +13,7 @@ from datetime import datetime
 import traceback
 from sqlalchemy.exc import SQLAlchemyError
 import requests
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
     
 def signup():
     name = request.form['name'].strip()
@@ -104,10 +104,10 @@ def get_feed_data(feed):
     }
 
 def getFeeds():
-    today = date.today()
+    twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
     feeds = (
         db.session.query(Feed)
-        .filter(db.func.DATE(Feed.created_at) == today, Feed.parent_feed_id.is_(None))
+        .filter(Feed.created_at >= twenty_four_hours_ago, Feed.parent_feed_id.is_(None))
         .order_by(Feed.created_at)
         .all()
     )
