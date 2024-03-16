@@ -377,7 +377,7 @@ def verifyToken():
             if token.valid_till > datetime.now():
                 user = db.session.query(User).filter_by(id=token.user_id).one_or_none()
                 if user:
-                    return jsonify({"user_id": user.id, "username": user.name, "access_token": access_token }), 200
+                    return jsonify({ "user_id": user.id, "username": user.name }), 200
                 else:
                     return jsonify({"error": "Invalid token"}), 400
             else:
