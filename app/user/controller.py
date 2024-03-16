@@ -12,8 +12,7 @@ from app.utils.app_functions import send_email
 from datetime import datetime
 import traceback
 from sqlalchemy.exc import SQLAlchemyError
-import requests
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
     
 def signup():
     name = request.form['name'].strip()
