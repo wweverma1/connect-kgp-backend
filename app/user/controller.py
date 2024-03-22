@@ -80,7 +80,7 @@ def signin():
 def verify():
     otp_id = request.form['otp_id']
     user_otp = request.form['user_otp']
-    name = request.form['name'].strip().title()
+    name = request.form['name'].strip()
     email = request.form['email'].strip()
     password = request.form['password']
     
