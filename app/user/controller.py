@@ -1,9 +1,8 @@
 from flask import (
     request, 
-    jsonify
+    jsonify,
 )
 import bcrypt
-from sqlalchemy import desc
 from app import db
 from app.user.models import User, Token, Log
 from app.otp.models import OTP
@@ -13,6 +12,7 @@ from datetime import datetime
 import traceback
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timedelta
+from threading import Thread
     
 def signup():
     name = request.form['name'].strip()
@@ -40,7 +40,7 @@ def signup():
             </div>
             <hr>
             <div>
-                <p>Hello {name} 👋,</p>
+                <p>Hello <b>{name}</b> 👋,</p>
                 <p>We are glad to have you on-board.</p>
                 <p>Use the below given 5 digit OTP for completing your registration-</p>
                 <div style="text-align: center; margin: 20px">
@@ -135,7 +135,43 @@ def postFeed():
     feed = Feed.post_feed(user_id, content.strip(), icon, parent_feed_id)
     if not feed:
         return jsonify({"error": "Some error occurred while posting your status"}), 500
+    Thread(target=sendAlert(parent_feed_id)).start()
     return jsonify({"message": "Status posted"}), 200
+
+def sendAlert(feed_id):
+    parent_feed = db.session.query(Feed.created_by).filter(Feed.id == feed_id).one_or_none()
+    user_id = parent_feed.created_by
+    user = db.session.query(User.name, User.email).filter(User.id == user_id).one_or_none()
+    if user:
+        email_body = f"""\
+            <html>
+            <body>
+                <div style="text-align: center;">
+                <div style="margin: auto;">
+                    <img src='https://connectkgp.netlify.app/images/connectkgp.png' alt='connectkgp icon' style="height: 22px;" />
+                    <span style="font-weight: bold; font-size: 32px; color: #6559a2;">ConnectKGP</span>
+                </div>
+                <span style="font-size: 14px;">KGP ka apna pseudonymous social network</span>
+                </div>
+                <hr>
+                <div>
+                <p>Hey <b>{user.name}</b> 👋,</p>
+                <p>Someone replied to your post on ConnectKGP!</p>
+                <p>React or respond to this reply to get engaged in deeper conversations.</p>
+                <div style="text-align: center; margin: 20px">
+                    <a href="https://connectkgp.netlify.app/" target="_blank" style="font-weight: bold; background-color: #6559a2; padding: 10px; color: white; text-decoration: none;">View Reply</a>
+                </div>
+                </div>
+                <p>Regards 🤗 <br>
+                <br>
+                <b style="color: #6559a2;">ConnectKGP</b>
+                <br>Made with ❤️ in KGP for KGP
+                </p>
+            </body>
+            </html>
+        """    
+        send_email(user.email, "Someone replied to your post 💬", email_body)
+    return
 
 def voteFeed():
     feed_id = request.form['feed_id']
@@ -199,7 +235,7 @@ def findUser():
                 </div>
                 <hr>
                 <div>
-                    <p>Hello {user.name} 👋,</p>
+                    <p>Hello <b>{user.name}</b> 👋,</p>
                     <p>It appears you are having a problem signing in.</p>
                     <p>Use the below given 5 digit OTP to proceed-</p>
                     <div style="text-align: center; margin: 20px">
