@@ -142,6 +142,7 @@ def postFeed():
     return jsonify({"message": "Status posted"}), 200
 
 def sendAlert(feed_id):
+    print('entered send alert')
     parent_feed = db.session.query(Feed.created_by).filter(Feed.id == feed_id).one_or_none()
 
     if not parent_feed:
@@ -152,9 +153,11 @@ def sendAlert(feed_id):
     
     if not user:
         return
+    print('got user')
     
     last_promotional_mail = user.last_promotional_mail
     if last_promotional_mail is not None and last_promotional_mail < datetime.now() - timedelta(days=1):
+        print('composing mail')
         email_body = f"""\
             <html>
             <body>
@@ -183,6 +186,7 @@ def sendAlert(feed_id):
             </html>
         """    
         if send_email(user.email, "Someone replied to your post 💬", email_body):
+            print('mail sent')
             user.last_promotional_mail = datetime.now()
             db.session.commit()    
 
