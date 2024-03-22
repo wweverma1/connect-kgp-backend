@@ -44,7 +44,7 @@ def signup():
                 <p>We are glad to have you on-board.</p>
                 <p>Use the below given 5 digit OTP for completing your registration-</p>
                 <div style="text-align: center; margin: 20px">
-                    <span style="font-weight: bold; background-color: #6559a2; padding: 10px; color: white; letter-spacing: 5px;">{otp.code}</a>
+                    <span style="font-weight: bold; background-color: #6559a2; padding: 10px; color: white; letter-spacing: 5px;">{otp.code}</span>
                 </div>
             </div>
             <p>Regards 🤗<br><br>
@@ -203,7 +203,7 @@ def findUser():
                     <p>It appears you are having a problem signing in.</p>
                     <p>Use the below given 5 digit OTP to proceed-</p>
                     <div style="text-align: center; margin: 20px">
-                        <span style="font-weight: bold; background-color: #6559a2; padding: 10px; color: white; letter-spacing: 5px;">{otp.code}</a>
+                        <span style="font-weight: bold; background-color: #6559a2; padding: 10px; color: white; letter-spacing: 5px;">{otp.code}</span>
                     </div>
                 </div>
                 <p>Regards 🤗<br><br>

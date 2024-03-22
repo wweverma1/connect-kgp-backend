@@ -1,12 +1,12 @@
 from flask import (
     request, 
-    jsonify
+    jsonify,
 )
-
 from app import db
 from app.home.models import Rating
+
 def home():
-    return "ConnectKGP", 200
+    return jsonify({"message": 'Welcome to ConnectKGP'}), 200
 
 def postRating():
     rating = request.form['rating']
