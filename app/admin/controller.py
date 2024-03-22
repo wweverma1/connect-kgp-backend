@@ -36,41 +36,42 @@ def sendInactivityAlerts():
     five_days_ago = datetime.now() - timedelta(days=5)
     one_day_ago = datetime.now() - timedelta(days=1)
     inactive_users = db.session.query(User.id, User.name, User.email).filter(User.last_active < five_days_ago, User.last_promotional_mail < one_day_ago).distinct().all()
-    Thread(target=sendAlerts, args=(inactive_users,)).start()
+    Thread(target=sendAlerts, kwargs={
+        'inactive_users': inactive_users
+    }).start()
     return jsonify({"message": f"sending inactivity alerts to {len(inactive_users)} users"}), 200
     
 def sendAlerts(inactive_users):
-    with current_app.app_context():
-        for user in inactive_users:
-            email_body = f"""\
-                <html>
-                <body>
-                    <div style="text-align: center;">
-                    <div style="margin: auto;">
-                        <img src='https://connectkgp.netlify.app/images/connectkgp.png' alt='connectkgp icon' style="height: 22px;" />
-                        <span style="font-weight: bold; font-size: 32px; color: #6559a2;">ConnectKGP</span>
-                    </div>
-                    <span style="font-size: 14px;">KGP ka apna pseudonymous social network</span>
-                    </div>
-                    <hr>
-                    <div>
-                    <p>Hey <b>{user.name}</b> 👋,</p>
-                    <p>It has been awhile since you've been on ConnectKGP, we've missed having you around.</p>
-                    <p>See what you've been missing or kindly let us know how we can improve.</p>
-                    <div style="text-align: center; margin: 20px">
-                        <a href="https://connectkgp.netlify.app/" target="_blank" style="font-weight: bold; background-color: #6559a2; padding: 10px; color: white; text-decoration: none;">Sign in Now</a>
-                    </div>
-                    </div>
-                    <p>Regards 🤗 <br>
-                    <br>
-                    <b style="color: #6559a2;">ConnectKGP</b>
-                    <br>Made with ❤️ in KGP for KGP
-                    </p>
-                </body>
-                </html>
-            """    
-            if send_email(user.email, "We miss you on ConnectKGP", email_body):
-                updateUser = User.query.filter_by(id=user.id).one_or_none()
-                if updateUser:
-                    updateUser.last_promotional_mail = datetime.now()
-                    db.session.commit()
+    for user in inactive_users:
+        email_body = f"""\
+            <html>
+            <body>
+                <div style="text-align: center;">
+                <div style="margin: auto;">
+                    <img src='https://connectkgp.netlify.app/images/connectkgp.png' alt='connectkgp icon' style="height: 22px;" />
+                    <span style="font-weight: bold; font-size: 32px; color: #6559a2;">ConnectKGP</span>
+                </div>
+                <span style="font-size: 14px;">KGP ka apna pseudonymous social network</span>
+                </div>
+                <hr>
+                <div>
+                <p>Hey <b>{user.name}</b> 👋,</p>
+                <p>It has been awhile since you've been on ConnectKGP, we've missed having you around.</p>
+                <p>See what you've been missing or kindly let us know how we can improve.</p>
+                <div style="text-align: center; margin: 20px">
+                    <a href="https://connectkgp.netlify.app/" target="_blank" style="font-weight: bold; background-color: #6559a2; padding: 10px; color: white; text-decoration: none;">Sign in Now</a>
+                </div>
+                </div>
+                <p>Regards 🤗 <br>
+                <br>
+                <b style="color: #6559a2;">ConnectKGP</b>
+                <br>Made with ❤️ in KGP for KGP
+                </p>
+            </body>
+            </html>
+        """    
+        if send_email(user.email, "We miss you on ConnectKGP", email_body):
+            updateUser = db.session.query(User).filter(User.id == user.id).one_or_none()
+            if updateUser:
+                updateUser.last_promotional_mail = datetime.now()
+                db.session.commit()
