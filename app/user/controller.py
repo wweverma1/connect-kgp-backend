@@ -136,10 +136,9 @@ def postFeed():
     feed = Feed.post_feed(user_id, content.strip(), icon, parent_feed_id)
     if not feed:
         return jsonify({"error": "Some error occurred while posting your status"}), 500
-    with app.app_context():
-        Thread(target=sendAlert, kwargs={
-            'feed_id': parent_feed_id
-        }).start()
+    
+    sendAlert(parent_feed_id)
+
     return jsonify({"message": "Status posted"}), 200
 
 def sendAlert(feed_id):
@@ -151,39 +150,41 @@ def sendAlert(feed_id):
     user_id = parent_feed.created_by
     user = db.session.query(User).filter(User.id == user_id).one_or_none()
     
-    if user:
-        last_promotional_mail = user.last_promotional_mail
-        if last_promotional_mail is not None and last_promotional_mail < datetime.now() - timedelta(days=1):
-            email_body = f"""\
-                <html>
-                <body>
-                    <div style="text-align: center;">
-                    <div style="margin: auto;">
-                        <img src='https://connectkgp.netlify.app/images/connectkgp.png' alt='connectkgp icon' style="height: 22px;" />
-                        <span style="font-weight: bold; font-size: 32px; color: #6559a2;">ConnectKGP</span>
-                    </div>
-                    <span style="font-size: 14px;">KGP ka apna pseudonymous social network</span>
-                    </div>
-                    <hr>
-                    <div>
-                    <p>Hey <b>{user.name}</b> 👋,</p>
-                    <p>Someone replied to your post on ConnectKGP!</p>
-                    <p>React or respond to this reply to get engaged in deeper conversations.</p>
-                    <div style="text-align: center; margin: 20px">
-                        <a href="https://connectkgp.netlify.app/" target="_blank" style="font-weight: bold; background-color: #6559a2; padding: 10px; color: white; text-decoration: none;">View Reply</a>
-                    </div>
-                    </div>
-                    <p>Regards 🤗 <br>
-                    <br>
-                    <b style="color: #6559a2;">ConnectKGP</b>
-                    <br>Made with ❤️ in KGP for KGP
-                    </p>
-                </body>
-                </html>
-            """    
-            if send_email(user.email, "Someone replied to your post 💬", email_body):
-                user.last_promotional_mail = datetime.now()
-                db.session.commit()            
+    if not user:
+        return
+    
+    last_promotional_mail = user.last_promotional_mail
+    if last_promotional_mail is not None and last_promotional_mail < datetime.now() - timedelta(days=1):
+        email_body = f"""\
+            <html>
+            <body>
+                <div style="text-align: center;">
+                <div style="margin: auto;">
+                    <img src='https://connectkgp.netlify.app/images/connectkgp.png' alt='connectkgp icon' style="height: 22px;" />
+                    <span style="font-weight: bold; font-size: 32px; color: #6559a2;">ConnectKGP</span>
+                </div>
+                <span style="font-size: 14px;">KGP ka apna pseudonymous social network</span>
+                </div>
+                <hr>
+                <div>
+                <p>Hey <b>{user.name}</b> 👋,</p>
+                <p>Someone replied to your post on ConnectKGP!</p>
+                <p>React or respond to this reply to get engaged in deeper conversations.</p>
+                <div style="text-align: center; margin: 20px">
+                    <a href="https://connectkgp.netlify.app/" target="_blank" style="font-weight: bold; background-color: #6559a2; padding: 10px; color: white; text-decoration: none;">View Reply</a>
+                </div>
+                </div>
+                <p>Regards 🤗 <br>
+                <br>
+                <b style="color: #6559a2;">ConnectKGP</b>
+                <br>Made with ❤️ in KGP for KGP
+                </p>
+            </body>
+            </html>
+        """    
+        if send_email(user.email, "Someone replied to your post 💬", email_body):
+            user.last_promotional_mail = datetime.now()
+            db.session.commit()    
 
 def voteFeed():
     feed_id = request.form['feed_id']
