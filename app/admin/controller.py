@@ -53,7 +53,7 @@ def sendAlerts(inactive_users):
                 <div>
                 <p>Hey <b>{user.name}</b> 👋,</p>
                 <p>It has been awhile since you've been on ConnectKGP, we've missed having you around.</p>
-                <p>See what you've been missing or kindly let us know how we can help.</p>
+                <p>See what you've been missing or kindly let us know how we can improve.</p>
                 <div style="text-align: center; margin: 20px">
                     <a href="https://connectkgp.netlify.app/" target="_blank" style="font-weight: bold; background-color: #6559a2; padding: 10px; color: white; text-decoration: none;">Sign in Now</a>
                 </div>
