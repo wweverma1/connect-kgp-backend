@@ -19,9 +19,12 @@ def getInfo():
     
     if infoType == "1":
         users = db.session.query(User).filter(cast(User.created_at, Date) == date_obj).all()
-        return jsonify({"date": date, "info": users}), 200
+        users_list = [{'id': user.id, 'name': user.name, 'created_at': user.created_at} for user in users]
+
+        return jsonify({"date": date, "info": users_list}), 200
     elif infoType == "2":
-        users = db.session.query(Log).filter(cast(Log.time, Date) == date_obj).all()
-        return jsonify({"date": date, "info": users}), 200
+        logs = db.session.query(Log).filter(cast(Log.time, Date) == date_obj).all()
+        users_list = [{'id': log.user_id, 'accessed_at': log.time} for log in logs]
+        return jsonify({"date": date, "info": users_list}), 200
     else:
         return jsonify({"error": "invalid request"}), 400
