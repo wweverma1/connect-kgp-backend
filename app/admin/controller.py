@@ -34,8 +34,8 @@ def getInfo():
 def sendInactivityAlerts():
     five_days_ago = datetime.now() - timedelta(days=5)
     one_day_ago = datetime.now() - timedelta(days=1)
-    inactive_users = db.session.query(User.name, User.email).filter(User.last_active < five_days_ago and User.last_promotional_mail < one_day_ago).distinct().all()
-    Thread(target=sendAlerts(inactive_users)).start()
+    inactive_users = db.session.query(User.id, User.name, User.email).filter(User.last_active < five_days_ago, User.last_promotional_mail < one_day_ago).distinct().all()
+    Thread(target=sendAlerts, args=(inactive_users,)).start()
     return jsonify({"message": f"sending inactivity alerts to {len(inactive_users)} users"}), 200
     
 def sendAlerts(inactive_users):
@@ -67,5 +67,9 @@ def sendAlerts(inactive_users):
             </body>
             </html>
         """    
-        send_email(user.email, "We miss you on ConnectKGP 😢", email_body)
+        if send_email(user.email, "We miss you on ConnectKGP", email_body):
+            updateUser = User.query.filter_by(id=user.id).one_or_none()
+            if updateUser:
+                updateUser.last_promotional_mail = datetime.now()
+                db.session.commit()
     return

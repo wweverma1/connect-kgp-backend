@@ -135,13 +135,13 @@ def postFeed():
     feed = Feed.post_feed(user_id, content.strip(), icon, parent_feed_id)
     if not feed:
         return jsonify({"error": "Some error occurred while posting your status"}), 500
-    Thread(target=sendAlert(parent_feed_id)).start()
+    Thread(target=sendAlert, args=(parent_feed_id,)).start()
     return jsonify({"message": "Status posted"}), 200
 
 def sendAlert(feed_id):
     parent_feed = db.session.query(Feed.created_by).filter(Feed.id == feed_id).one_or_none()
     user_id = parent_feed.created_by
-    user = db.session.query(User.name, User.email, User.last_promotional_mail).filter(User.id == user_id).one_or_none()
+    user = db.session.query(User).filter(User.id == user_id).one_or_none()
     
     if user:
         last_promotional_mail = user.last_promotional_mail
@@ -175,7 +175,7 @@ def sendAlert(feed_id):
             """    
             if send_email(user.email, "Someone replied to your post 💬", email_body):
                 user.last_promotional_mail = datetime.now()
-                db.session.commit()
+                db.session.commit()            
     return
 
 def voteFeed():
@@ -416,7 +416,7 @@ def sendInvite():
         </body>
         </html>
     """
-    if send_email(email, "Yayy! You have been invited", email_body):
+    if send_email(email, "Yayy! You have been invited 🎉", email_body):
         return jsonify({ "message": "invitation sent" }), 200
     else:
         return jsonify({"error": "Couldn't send invitation"}), 500
@@ -446,5 +446,3 @@ def verifyToken():
             return jsonify({"error": "Invalid token"}), 400
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-
