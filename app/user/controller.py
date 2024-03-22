@@ -5,7 +5,7 @@ from flask import (
 import bcrypt
 from sqlalchemy import desc
 from app import db
-from app.user.models import User, Token
+from app.user.models import User, Token, Log
 from app.otp.models import OTP
 from app.feed.models import Feed
 from app.utils.app_functions import send_email
@@ -68,6 +68,9 @@ def signin():
     if bcrypt.checkpw(password.encode('utf-8'), user.password):
         access_token = Token.generate_and_add_token(user.id)
         if access_token:
+            user.last_active = datetime.now()
+            Log.add_log(user.id)
+            db.session.commit()
             return jsonify({"user_id": user.id, "username": user.name, "access_token": access_token }), 200
         else:
             return jsonify({"error": "Login failed. Unable to generate access token"}), 400
@@ -90,6 +93,7 @@ def verify():
             return jsonify({"error": "Some error occured while creating account"}), 500
         access_token = Token.generate_and_add_token(user.id)
         if access_token:
+            Log.add_log(user.id)
             return jsonify({"user_id": user.id, "username": user.name, "access_token": access_token }), 200
         else:
             return jsonify({"error": "Sign up completed but unable to generate access token"}), 400
@@ -377,6 +381,10 @@ def verifyToken():
             if token.valid_till > datetime.now():
                 user = db.session.query(User).filter_by(id=token.user_id).one_or_none()
                 if user:
+                    user.last_active = datetime.now()
+                    Log.save_log(user.id)
+                    db.session.commit()
+                    
                     return jsonify({ "user_id": user.id, "username": user.name }), 200
                 else:
                     return jsonify({"error": "Invalid token"}), 400
