@@ -382,7 +382,7 @@ def verifyToken():
                 user = db.session.query(User).filter_by(id=token.user_id).one_or_none()
                 if user:
                     user.last_active = datetime.now()
-                    Log.save_log(user.id)
+                    Log.add_log(user.id)
                     db.session.commit()
                     
                     return jsonify({ "user_id": user.id, "username": user.name }), 200
