@@ -35,7 +35,7 @@ def sendInactivityAlerts():
     three_days_ago = datetime.now() - timedelta(days=3)
     inactive_users = db.session.query(User.name, User.email).filter(User.last_active <= three_days_ago).distinct().all()
     Thread(target=sendAlerts(inactive_users)).start()
-    return jsonify({"message": f"sending inactivity alerts to {len(inactive_users)}"}), 200
+    return jsonify({"message": f"sending inactivity alerts to {len(inactive_users)} users"}), 200
     
 def sendAlerts(inactive_users):
     for user in inactive_users:
