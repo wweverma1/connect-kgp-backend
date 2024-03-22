@@ -1,12 +1,11 @@
 from flask import (
     request, 
-    jsonify,
-    current_app
+    jsonify
 )
 from sqlalchemy import cast, Date
 from app.user.models import User, Log
 from datetime import datetime
-from app import db
+from app import app, db
 from datetime import datetime, timedelta
 from app.utils.app_functions import send_email
 from threading import Thread
@@ -36,9 +35,10 @@ def sendInactivityAlerts():
     five_days_ago = datetime.now() - timedelta(days=5)
     one_day_ago = datetime.now() - timedelta(days=1)
     inactive_users = db.session.query(User.id, User.name, User.email).filter(User.last_active < five_days_ago, User.last_promotional_mail < one_day_ago).distinct().all()
-    Thread(target=sendAlerts, kwargs={
-        'inactive_users': inactive_users
-    }).start()
+    with app.app_context():
+        Thread(target=sendAlerts, kwargs={
+            'inactive_users': inactive_users
+        }).start()
     return jsonify({"message": f"sending inactivity alerts to {len(inactive_users)} users"}), 200
     
 def sendAlerts(inactive_users):

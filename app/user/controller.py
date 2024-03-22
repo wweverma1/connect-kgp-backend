@@ -1,9 +1,9 @@
 from flask import (
     request, 
     jsonify,
-    current_app
 )
 import bcrypt
+from app import app
 from app import db
 from app.user.models import User, Token, Log
 from app.otp.models import OTP
@@ -136,9 +136,10 @@ def postFeed():
     feed = Feed.post_feed(user_id, content.strip(), icon, parent_feed_id)
     if not feed:
         return jsonify({"error": "Some error occurred while posting your status"}), 500
-    Thread(target=sendAlert, kwargs={
-        'feed_id': parent_feed_id
-    }).start()
+    with app.app_context():
+        Thread(target=sendAlert, kwargs={
+            'feed_id': parent_feed_id
+        }).start()
     return jsonify({"message": "Status posted"}), 200
 
 def sendAlert(feed_id):
