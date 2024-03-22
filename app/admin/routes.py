@@ -6,4 +6,4 @@ from app.admin.controller import (
 
 admin_api = Blueprint('admin', __name__)
 
-admin_api.add_url_rule(rule='/info', view_func=getInfo, methods=['GET'])
+admin_api.add_url_rule(rule='/get-info', view_func=getInfo, methods=['GET'])
