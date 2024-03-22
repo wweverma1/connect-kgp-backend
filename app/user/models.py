@@ -22,7 +22,7 @@ class User(db.Model):
     friends = db.Column(MutableList.as_mutable(ARRAY(db.Integer)), default=[])
     created_at = db.Column(db.DateTime, default=datetime.now())
     last_active = db.Column(db.DateTime, default=datetime.now())
-    last_promotional_mail = db.Column(db.DateTime, default=datetime.now())
+    last_promotional_mail = db.Column(db.DateTime, nullable=True, default=None)
 
     @staticmethod
     def create_user(name, email, password):
