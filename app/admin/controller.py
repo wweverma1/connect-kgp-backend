@@ -32,8 +32,9 @@ def getInfo():
         return jsonify({"error": "invalid request"}), 400
     
 def sendInactivityAlerts():
-    three_days_ago = datetime.now() - timedelta(days=3)
-    inactive_users = db.session.query(User.name, User.email).filter(User.last_active <= three_days_ago).distinct().all()
+    five_days_ago = datetime.now() - timedelta(days=5)
+    one_day_ago = datetime.now() - timedelta(days=1)
+    inactive_users = db.session.query(User.name, User.email).filter(User.last_active < five_days_ago and User.last_promotional_mail < one_day_ago).distinct().all()
     Thread(target=sendAlerts(inactive_users)).start()
     return jsonify({"message": f"sending inactivity alerts to {len(inactive_users)} users"}), 200
     
