@@ -20,9 +20,11 @@ SCHEMA_NAME = os.getenv("SCHEMA_NAME")
 
 from app.home.routes import home_api
 from app.user.routes import user_api
+from app.admin.routes import admin_api
 
 app.register_blueprint(home_api)
 app.register_blueprint(user_api)
+app.register_blueprint(admin_api)
 
 from app.utils.app_functions import (
     before_request,

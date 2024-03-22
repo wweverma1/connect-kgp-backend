@@ -177,6 +177,8 @@ def voteFeed():
 def findUser():
     user_email = request.args.get('email')
 
+    if not user_email:
+        return jsonify({"error": "invalid request"}), 400
     try:
         user = db.session.query(User).filter_by(email=user_email).one_or_none()
         if not user:
@@ -258,6 +260,9 @@ def updatePassword():
 def reportUser():
     user_id = request.args.get('uid')
 
+    if not user_id:
+        return jsonify({"error": "invalid request"}), 400
+    
     user = db.session.query(User).filter_by(id=user_id).one_or_none()
     if user:
         try:
@@ -298,6 +303,9 @@ def addFriend():
     
 def getFriends():
     user_id = request.args.get('uid')
+
+    if not user_id:
+        return jsonify({"error": "invalid request"}), 400
 
     try:
         user = db.session.query(User).filter_by(id=user_id).one_or_none()
@@ -374,6 +382,9 @@ def sendInvite():
     
 def verifyToken():
     access_token = request.args.get('access_token')
+
+    if not access_token:
+        return jsonify({"error": "invalid request"}), 400
 
     try:
         token = db.session.query(Token).filter_by(token=access_token).one_or_none()
