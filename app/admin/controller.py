@@ -7,7 +7,7 @@ from app.user.models import User, Log
 from datetime import datetime
 from app import app, db
 from datetime import datetime, timedelta
-from app.utils.app_functions import send_email
+from app.utils.app_functions import send_email, send_bcc_email
 from threading import Thread
 
 def getInfo():
@@ -42,36 +42,37 @@ def sendInactivityAlerts():
     return jsonify({"message": f"sending inactivity alerts to {len(inactive_users)} users"}), 200
     
 def sendAlerts(inactive_users):
-    for user in inactive_users:
-        email_body = f"""\
-            <html>
-            <body>
-                <div style="text-align: center;">
-                <div style="margin: auto;">
-                    <img src='https://connectkgp.netlify.app/images/connectkgp.png' alt='connectkgp icon' style="height: 22px;" />
-                    <span style="font-weight: bold; font-size: 32px; color: #6559a2;">ConnectKGP</span>
-                </div>
-                <span style="font-size: 14px;">KGP ka apna pseudonymous social network</span>
-                </div>
-                <hr>
-                <div>
-                <p>Hey <b>{user.name}</b> 👋,</p>
-                <p>It has been awhile since you've been on ConnectKGP, we've missed having you around.</p>
-                <p>See what you've been missing or kindly let us know how we can improve.</p>
-                <div style="text-align: center; margin: 20px">
-                    <a href="https://connectkgp.netlify.app/" target="_blank" style="font-weight: bold; background-color: #6559a2; padding: 10px; color: white; text-decoration: none;">Sign in Now</a>
-                </div>
-                </div>
-                <p>Regards 🤗 <br>
-                <br>
-                <b style="color: #6559a2;">ConnectKGP</b>
-                <br>Made with ❤️ in KGP for KGP
-                </p>
-            </body>
-            </html>
-        """    
-        if send_email(user.email, "We miss you on ConnectKGP", email_body):
-            updateUser = db.session.query(User).filter(User.id == user.id).one_or_none()
+    recipients = [user.email for user in inactive_users]
+    email_body = f"""\
+        <html>
+        <body>
+            <div style="text-align: center;">
+            <div style="margin: auto;">
+                <img src='https://connectkgp.netlify.app/images/connectkgp.png' alt='connectkgp icon' style="height: 22px;" />
+                <span style="font-weight: bold; font-size: 32px; color: #6559a2;">ConnectKGP</span>
+            </div>
+            <span style="font-size: 14px;">KGP ka apna pseudonymous social network</span>
+            </div>
+            <hr>
+            <div>
+            <p>Hello 👋,</p>
+            <p>It has been awhile since you've been on ConnectKGP, we've missed having you around.</p>
+            <p>See what you've been missing or kindly let us know how we can improve.</p>
+            <div style="text-align: center; margin: 20px">
+                <a href="https://connectkgp.netlify.app/" target="_blank" style="font-weight: bold; background-color: #6559a2; padding: 10px; color: white; text-decoration: none;">Sign in Now</a>
+            </div>
+            </div>
+            <p>Regards 🤗 <br>
+            <br>
+            <b style="color: #6559a2;">ConnectKGP</b>
+            <br>Made with ❤️ in KGP for KGP
+            </p>
+        </body>
+        </html>
+    """    
+    if send_bcc_email(recipients, "We miss you on ConnectKGP", email_body):
+        for user in inactive_users:
+            updateUser = db.session.query(User).filter(User.email in recipients).one_or_none()
             if updateUser:
                 updateUser.last_promotional_mail = datetime.now()
                 db.session.commit()

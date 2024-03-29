@@ -49,3 +49,21 @@ def send_email(recipient_email, subject, body):
     except Exception as e:
         print(f'Email Sending Failed: {str(e)}')
         return False
+    
+def send_bcc_email(recipients, subject, body):
+    try:
+        # Create the email message
+        message = MIMEMultipart()
+        message['From'] = sender_email
+        message['Bcc'] = ', '.join(recipients)
+        message['Subject'] = subject
+        message.attach(MIMEText(body, 'html'))
+
+        # Connect to the SMTP server and send the email
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(sender_email, sender_password)
+            server.sendmail(sender_email, recipients, message.as_string())
+        return True
+    except Exception as e:
+        print(f'Email Sending Failed: {str(e)}')
+        return False
