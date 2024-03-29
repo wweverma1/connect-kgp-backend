@@ -2,7 +2,7 @@ from flask import (
     request, 
     jsonify
 )
-from sqlalchemy import cast, Date
+from sqlalchemy import cast, Date, and_
 from app.user.models import User, Log
 from datetime import datetime
 from app import app, db
@@ -34,12 +34,12 @@ def getInfo():
 def sendInactivityAlerts():
     five_days_ago = datetime.now() - timedelta(days=5)
     one_day_ago = datetime.now() - timedelta(days=1)
-    inactive_users = db.session.query(User.id, User.name, User.email).filter(User.last_active < five_days_ago, User.last_promotional_mail < one_day_ago).distinct().all()
-    with app.app_context():
-        Thread(target=sendAlerts, kwargs={
-            'inactive_users': inactive_users
-        }).start()
-    return jsonify({"message": f"sending inactivity alerts to {len(inactive_users)} users"}), 200
+    inactive_users = db.session.query(User.id, User.name, User.email).filter(and_(User.last_active < five_days_ago, (User.last_promotional_mail.is_(None) | (User.last_promotional_mail < one_day_ago)))).distinct().all()
+    if inactive_users:
+        sendAlerts(inactive_users)
+        return jsonify({"message": f"sending inactivity alerts to {len(inactive_users)} users"}), 200
+    else:
+        return jsonify({"message": "no user found"}), 400
     
 def sendAlerts(inactive_users):
     recipients = [user.email for user in inactive_users]
