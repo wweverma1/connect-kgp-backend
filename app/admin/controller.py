@@ -37,7 +37,7 @@ def sendInactivityAlerts():
     inactive_users = db.session.query(User.id, User.name, User.email).filter(and_(User.last_active < five_days_ago, (User.last_promotional_mail.is_(None) | (User.last_promotional_mail < one_day_ago)))).distinct().all()
     if inactive_users:
         sendAlerts(inactive_users)
-        return jsonify({"message": f"sending inactivity alerts to {len(inactive_users)} users"}), 200
+        return jsonify({"message": f"Inactivity alerts sent to {len(inactive_users)} users"}), 200
     else:
         return jsonify({"message": "no user found"}), 400
     
