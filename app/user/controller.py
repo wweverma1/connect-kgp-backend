@@ -129,15 +129,15 @@ def getFeeds():
 
 def postFeed():
     user_id = request.form['uid']
-    content = request.form['content']
+    content = request.form['content'].strip()
     icon = request.form['icon']
     parent_feed_id = request.form.get('parent_feed_id')
     imageFile = request.form.get('imageFile', None)
 
     if imageFile is not None:
-        content = content.strip()+f'<image>{imageFile}</image>'
+        content+= f'<image>{imageFile}</image>'
 
-    feed = Feed.post_feed(user_id, content.strip(), icon, parent_feed_id)
+    feed = Feed.post_feed(user_id, content, icon, parent_feed_id)
     if not feed:
         return jsonify({"error": "Some error occurred while posting your status"}), 500
     
