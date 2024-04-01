@@ -132,9 +132,10 @@ def postFeed():
     content = request.form['content'].strip()
     icon = request.form['icon']
     parent_feed_id = request.form.get('parent_feed_id')
-    imageFile = request.form.get('imageFile', None)
+    imageFile = request.form.get('imageFile')
 
-    if imageFile is not None:
+    if imageFile:
+        print("receieved image- ", imageFile)
         content+= f'<image>{imageFile}</image>'
 
     feed = Feed.post_feed(user_id, content, icon, parent_feed_id)
