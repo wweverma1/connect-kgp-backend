@@ -132,6 +132,10 @@ def postFeed():
     content = request.form['content']
     icon = request.form['icon']
     parent_feed_id = request.form.get('parent_feed_id')
+    imageFile = request.form.get('imageFile', None)
+
+    if imageFile is not None:
+        content = content.strip()+f'<image>{imageFile}</image>'
 
     feed = Feed.post_feed(user_id, content.strip(), icon, parent_feed_id)
     if not feed:
