@@ -116,7 +116,7 @@ def get_feed_data(feed):
     }
 
 def getFeeds():
-    twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
+    twenty_four_hours_ago = datetime.now() - timedelta(hours=48)
     feeds = (
         db.session.query(Feed)
         .filter(Feed.created_at >= twenty_four_hours_ago, Feed.parent_feed_id.is_(None))
@@ -331,25 +331,30 @@ def addFriend():
     uid = request.form['user_id']
     fid = request.form['friend_id']
 
-    user = db.session.query(User).filter_by(id=uid).one_or_none()
-    friend = db.session.query(User).filter_by(id=fid).one_or_none()
-
-    if user and friend:
-        if fid in user.friends:
-            return jsonify({"message": "You are already friends with this user"}), 400
-        else:
-            try:
-                user.friends.append(fid)
-                friend.friends.append(uid)
-                db.session.commit()
-                return jsonify({"message": "friend added"}), 200
-            except SQLAlchemyError as e:
-                print(e)
-                traceback.print_exc()
-                db.session.rollback()
-                return jsonify({"error": "couldn't add friend"}), 500
+    if uid == 7:
+        return jsonify({"error": "Sign up to start adding friends."})
+    elif fid == 7:
+        return jsonify({"error": "A test user can't be added as a friend."})
     else:
-        return jsonify({"error": "user/users not found"}), 400
+        user = db.session.query(User).filter_by(id=uid).one_or_none()
+        friend = db.session.query(User).filter_by(id=fid).one_or_none()
+
+        if user and friend:
+            if fid in user.friends:
+                return jsonify({"message": "You are already friends with this user"}), 400
+            else:
+                try:
+                    user.friends.append(fid)
+                    friend.friends.append(uid)
+                    db.session.commit()
+                    return jsonify({"message": "friend added"}), 200
+                except SQLAlchemyError as e:
+                    print(e)
+                    traceback.print_exc()
+                    db.session.rollback()
+                    return jsonify({"error": "couldn't add friend"}), 500
+        else:
+            return jsonify({"error": "user/users not found"}), 400
     
 def getFriends():
     user_id = request.args.get('uid')
