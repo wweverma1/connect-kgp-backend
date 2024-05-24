@@ -332,9 +332,9 @@ def addFriend():
     fid = request.form['friend_id']
 
     if uid == 7:
-        return jsonify({"error": "Sign up to start adding friends."})
+        return jsonify({"error": "Sign up to start adding friends."}), 400
     elif fid == 7:
-        return jsonify({"error": "A test user can't be added as a friend."})
+        return jsonify({"error": "A test user can't be added as a friend."}), 400
     else:
         user = db.session.query(User).filter_by(id=uid).one_or_none()
         friend = db.session.query(User).filter_by(id=fid).one_or_none()
@@ -366,7 +366,7 @@ def getFriends():
         user = db.session.query(User).filter_by(id=user_id).one_or_none()
         if user:
             friends = User.query.filter(User.id.in_(user.friends)).all()
-            friend_list = [{'id': friend.id, 'name': friend.name} for friend in friends]
+            friend_list = [{'id': friend.id, 'name': friend.name, 'last_active': friend.last_active} for friend in friends]
             return jsonify({'friends': friend_list}), 200
         else:
             return jsonify({'error': 'user not found'}), 400
