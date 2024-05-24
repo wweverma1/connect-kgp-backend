@@ -328,8 +328,8 @@ def reportUser():
         return jsonify({"error": "user not found"}), 400
 
 def addFriend():
-    uid = request.form['user_id']
-    fid = request.form['friend_id']
+    uid = int(request.form['user_id'])
+    fid = int(request.form['friend_id'])
 
     if uid == 7:
         return jsonify({"error": "Sign up to start adding friends."}), 400
