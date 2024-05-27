@@ -72,7 +72,7 @@ def signin():
             user.last_active = datetime.now()
             Log.add_log(user.id)
             db.session.commit()
-            return jsonify({"user_id": user.id, "username": user.name, "access_token": access_token }), 200
+            return jsonify({"user_id": user.id, "username": user.name, "icon": user.icon, "access_token": access_token }), 200
         else:
             return jsonify({"error": "Login failed. Unable to generate access token"}), 400
     else:
@@ -95,7 +95,7 @@ def verify():
         access_token = Token.generate_and_add_token(user.id)
         if access_token:
             Log.add_log(user.id)
-            return jsonify({"user_id": user.id, "username": user.name, "access_token": access_token }), 200
+            return jsonify({"user_id": user.id, "username": user.name, "icon": user.icon, "access_token": access_token }), 200
         else:
             return jsonify({"error": "Sign up completed but unable to generate access token"}), 400
     else:
@@ -299,7 +299,7 @@ def updatePassword():
         db.session.commit()
         access_token = Token.generate_and_add_token(user.id)
         if access_token:
-            return jsonify({"user_id": user.id, "username": user.name, "access_token": access_token }), 200
+            return jsonify({"user_id": user.id, "username": user.name, "icon": user.icon, "access_token": access_token }), 200
         else:
             return jsonify({"error": "Password updated but unable to generate access token"}), 400
 
@@ -366,7 +366,7 @@ def getFriends():
         user = db.session.query(User).filter_by(id=user_id).one_or_none()
         if user:
             friends = User.query.filter(User.id.in_(user.friends)).all()
-            friend_list = [{'id': friend.id, 'name': friend.name, 'last_active': friend.last_active} for friend in friends]
+            friend_list = [{'id': friend.id, 'name': friend.name, 'icon': friend.icon, 'last_active': friend.last_active} for friend in friends]
             return jsonify({'friends': friend_list}), 200
         else:
             return jsonify({'error': 'user not found'}), 400
@@ -451,7 +451,7 @@ def verifyToken():
                     Log.add_log(user.id)
                     db.session.commit()
                     
-                    return jsonify({ "user_id": user.id, "username": user.name }), 200
+                    return jsonify({ "user_id": user.id, "username": user.name, "icon": user.icon }), 200
                 else:
                     return jsonify({"error": "Invalid token"}), 400
             else:

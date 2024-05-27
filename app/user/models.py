@@ -1,6 +1,7 @@
 # Standard library imports
 import traceback
 import uuid
+import random
 
 # Related third party imports
 from sqlalchemy import ARRAY
@@ -18,6 +19,7 @@ class User(db.Model):
     name = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.LargeBinary, nullable=False)
+    icon = db.Column(db.Integer, nullable=False, default=lambda: random.randint(1, 8))
     rating = db.Column(db.Integer, nullable=False, default=0)
     friends = db.Column(MutableList.as_mutable(ARRAY(db.Integer)), default=[])
     created_at = db.Column(db.DateTime, default=datetime.now())
@@ -31,6 +33,7 @@ class User(db.Model):
                 name=name, 
                 email=email, 
                 password=password,
+                icon=random.randint(1, 8),
                 rating=0,
                 friends=[],
                 created_at=datetime.now(),
