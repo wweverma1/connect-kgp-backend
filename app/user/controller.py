@@ -116,7 +116,7 @@ def get_feed_data(feed):
     }
 
 def getFeeds():
-    twenty_four_hours_ago = datetime.now() - timedelta(hours=48)
+    twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
     feeds = (
         db.session.query(Feed)
         .filter(Feed.created_at >= twenty_four_hours_ago, Feed.parent_feed_id.is_(None))
