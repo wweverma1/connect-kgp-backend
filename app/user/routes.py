@@ -9,13 +9,15 @@ from app.user.controller import (
     voteFeed,
     findUser,
     verifyUser,
-    updatePassword,
+    resetPassword,
     reportUser,
     addFriend,
     getFriends,
     removeFriend,
     sendInvite,
-    verifyToken
+    verifyToken,
+    updateAvatar,
+    updatePassword
 )
 
 user_api = Blueprint('user', __name__)
@@ -28,10 +30,13 @@ user_api.add_url_rule(rule='/feed', view_func=postFeed, methods=['POST'])
 user_api.add_url_rule(rule='/feed/vote', view_func=voteFeed, methods=['POST'])
 user_api.add_url_rule(rule='/find-user', view_func=findUser, methods=['GET'])
 user_api.add_url_rule(rule='/password-verify-email', view_func=verifyUser, methods=['POST'])
-user_api.add_url_rule(rule='/update-password', view_func=updatePassword, methods=['POST'])
+user_api.add_url_rule(rule='/reset-password', view_func=resetPassword, methods=['POST'])
 user_api.add_url_rule(rule='/report-user', view_func=reportUser, methods=['GET'])
 user_api.add_url_rule(rule='/add-friend', view_func=addFriend, methods=['POST'])
 user_api.add_url_rule(rule='/friends', view_func=getFriends, methods=['GET'])
 user_api.add_url_rule(rule='/remove-friend', view_func=removeFriend, methods=['POST'])
 user_api.add_url_rule(rule='/send-invite', view_func=sendInvite, methods=['POST'])
 user_api.add_url_rule(rule='/verify-token', view_func=verifyToken, methods=['GET'])
+user_api.add_url_rule(rule='/update-avatar', view_func=updateAvatar, methods=['POST'])
+user_api.add_url_rule(rule='/update-password', view_func=updatePassword, methods=['POST'])
+

@@ -284,7 +284,7 @@ def verifyUser():
     else:
         return jsonify({"error": "Incorrect OTP, Unable to Verify"}), 400
     
-def updatePassword():
+def resetPassword():
     user_id = request.form['user_id']
     password = request.form['password']
 
@@ -455,8 +455,51 @@ def verifyToken():
                 else:
                     return jsonify({"error": "Invalid token"}), 400
             else:
-                return jsonify({"error": "Token expired"}), 401
+                return jsonify({"error": "Token expired"}), 400
         else:
             return jsonify({"error": "Invalid token"}), 400
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+    
+def updateAvatar():
+    user_id = int(request.form['uid'])
+    icon = int(request.form['icon'])
+
+    if user_id == 7:
+        return jsonify({"error": "Can't change avatar of a test user."}), 400
+    
+    try:
+        user = db.session.query(User).filter_by(id=user_id).one_or_none()
+        if not user:
+            return jsonify({"error": "Invalid user id"}), 400
+        
+        user.icon = icon
+        db.session.commit()
+        return jsonify({"icon": user.icon}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Database error: {str(e)}"}), 500
+    
+def updatePassword():
+    user_id = int(request.form['uid'])
+    prevPassword = request.form['prevPassword']
+    newPassword = request.form['newPassword']
+
+    if user_id == 7:
+        return jsonify({"error": "Can't update password of a test user."}), 400
+
+    try:
+        user = db.session.query(User).filter_by(id=user_id).one_or_none()
+        if not user:
+            return jsonify({"error": "Invalid user id"}), 400
+        
+        if bcrypt.checkpw(prevPassword.encode('utf-8'), user.password):
+            new_hashed_password = bcrypt.hashpw(newPassword.encode('utf-8'), bcrypt.gensalt())
+            user.password = new_hashed_password
+            db.session.commit()
+            return jsonify({ "message": "password updated" }), 200
+        else:
+            return jsonify({"error": "Incorrect password"}), 400
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Database error: {str(e)}"}), 500
