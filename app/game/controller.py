@@ -76,15 +76,20 @@ def voteLegend():
             return jsonify({"error": "Invalid option"}), 400
         
         if user_id in option.liked_by:
-            return jsonify({"error": "Option already liked by user"}), 400
-        
-        option.liked_by.append(user_id)
+            option.liked_by.remove(user_id)
+        else: 
+            option.liked_by.append(user_id)
         db.session.commit()
         
-        legend = Legend.query.filter_by(created_for=created_for).order_by(func.array_length(Legend.liked_by, 1).desc(), Legend.created_at.asc()).first()
-       
-        return jsonify({"legend": {"name": legend.option_name, "color": legend.color}}), 200
+        legends = Legend.query.filter_by(created_for=created_for).order_by(func.array_length(Legend.liked_by, 1).desc(), Legend.created_at.asc()).all()
     
+        options = [{
+            "option_id": legend.id,
+            "option_name": legend.option_name,
+            "liked_by": legend.liked_by
+        } for legend in legends]
+
+        return jsonify({"options": options}), 200
     except SQLAlchemyError as e:
         print(e)
         traceback.print_exc()
