@@ -20,21 +20,20 @@ def getRandomHexCode():
 
 def getLegends():
     try:
-        # Querying for distinct blocks
         created_for_values = db.session.query(Legend.created_for).distinct().all()
         print(created_for_values)
-        # Fetching the legend for each available block
+        
         response = {}
         for created_for in created_for_values:
-            legend = Legend.query.filter_by(created_for=created_for[0]) \
-                .order_by(func.array_length(Legend.liked_by, 1).desc(), Legend.created_at.asc()) \
-                .first()
+            legends = Legend.query.filter_by(created_for=created_for[0]).all()    
+            sorted_legends = sorted(legends, key=lambda legend: (len(legend.liked_by), legend.created_at), reverse=True)
+        
+            legend = sorted_legends[0] if sorted_legends else None
 
             if legend:
                 response[created_for[0]] = {"name": legend.option_name, "color": legend.color}
 
         return jsonify({"legends": response}), 200
-
     except SQLAlchemyError as e:
         print(e)
         traceback.print_exc()
@@ -53,14 +52,15 @@ def postLegend():
     if not legend:
         return jsonify({"error": "Some error occurred while posting your option"}), 500
     
-    legends = Legend.query.filter_by(created_for=created_for).order_by(func.array_length(Legend.liked_by, 1).desc(), Legend.created_at.asc()).all()
+    legends = Legend.query.filter_by(created_for=created_for).all()
+    sorted_legends = sorted(legends, key=lambda legend: (len(legend.liked_by), legend.created_at), reverse=True)
     
-    legend = legends[0]
+    legend = sorted_legends[0]
     options = [{
         "option_id": legend.id,
         "option_name": legend.option_name,
         "liked_by": legend.liked_by
-    } for legend in legends]
+    } for legend in sorted_legends]
 
     return jsonify({"legend": {"name": legend.option_name, "color": legend.color}, "options": options}), 200
 
@@ -81,13 +81,14 @@ def voteLegend():
             option.liked_by.append(user_id)
         db.session.commit()
         
-        legends = Legend.query.filter_by(created_for=created_for).order_by(func.array_length(Legend.liked_by, 1).desc(), Legend.created_at.asc()).all()
+        legends = Legend.query.filter_by(created_for=created_for).all()
+        sorted_legends = sorted(legends, key=lambda legend: (len(legend.liked_by), legend.created_at), reverse=True)
     
         options = [{
             "option_id": legend.id,
             "option_name": legend.option_name,
             "liked_by": legend.liked_by
-        } for legend in legends]
+        } for legend in sorted_legends]
 
         return jsonify({"options": options}), 200
     except SQLAlchemyError as e:
@@ -103,13 +104,14 @@ def getOptions():
         return jsonify({"error": "invalid request"}), 400
 
     try:
-        legends = Legend.query.filter_by(created_for=block_id).order_by(func.array_length(Legend.liked_by, 1).desc(), Legend.created_at.asc()).all()
+        legends = Legend.query.filter_by(created_for=block_id).all()
+        sorted_legends = sorted(legends, key=lambda legend: (len(legend.liked_by), legend.created_at), reverse=True)
     
         options = [{
             "option_id": legend.id,
             "option_name": legend.option_name,
             "liked_by": legend.liked_by
-        } for legend in legends]
+        } for legend in sorted_legends]
 
         return jsonify({"options": options}), 200
     except Exception as e:
