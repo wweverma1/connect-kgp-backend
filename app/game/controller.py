@@ -100,6 +100,7 @@ def getOptions():
         legends = Legend.query.filter_by(created_for=block_id).order_by(func.array_length(Legend.liked_by, 1).desc(), Legend.created_at.asc()).all()
     
         options = [{
+            "option_id": legend.id,
             "option_name": legend.option_name,
             "liked_by": legend.liked_by
         } for legend in legends]
