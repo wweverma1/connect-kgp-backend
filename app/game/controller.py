@@ -21,15 +21,16 @@ def getRandomHexCode():
 def getLegends():
     try:
         created_for_values = db.session.query(Legend.created_for).distinct().all()
-        print(created_for_values)
         
         response = {}
         for created_for in created_for_values:
-            legends = Legend.query.filter_by(created_for=created_for[0]).all()    
-            sorted_legends = sorted(legends, key=lambda legend: (len(legend.liked_by), legend.created_at), reverse=True)
+            legends = Legend.query.filter_by(created_for=created_for[0]).all()
+            
+            # Sort legends by number of likes and ID
+            sorted_legends = sorted(legends, key=lambda legend: (-len(legend.liked_by), legend.id))
         
             legend = sorted_legends[0] if sorted_legends else None
-
+            
             if legend:
                 response[created_for[0]] = {"name": legend.option_name, "color": legend.color}
 
@@ -41,49 +42,60 @@ def getLegends():
         return jsonify({"error": "Couldn't fetch legends"}), 500
 
 def postLegend():
-    created_for = int(request.form['created_for'])
-    created_by = int(request.form['user_id'])
-    option_name = request.form['option_name'].strip()
+    try:
+        created_for = int(request.form['created_for'])
+        created_by = int(request.form['user_id'])
+        option_name = request.form['option_name'].strip()
 
-    color = getRandomHexCode()
+        color = getRandomHexCode()
 
-    legend = Legend.post_legend(created_for, option_name, color, created_by)
+        legend = Legend.post_legend(created_for, option_name, color, created_by)
 
-    if not legend:
-        return jsonify({"error": "Some error occurred while posting your option"}), 500
-    
-    legends = Legend.query.filter_by(created_for=created_for).all()
-    sorted_legends = sorted(legends, key=lambda legend: (len(legend.liked_by), legend.created_at), reverse=True)
-    
-    legend = sorted_legends[0]
-    options = [{
-        "option_id": legend.id,
-        "option_name": legend.option_name,
-        "liked_by": legend.liked_by
-    } for legend in sorted_legends]
+        if not legend:
+            return jsonify({"error": "Some error occurred while posting your option"}), 500
+        
+        legends = Legend.query.filter_by(created_for=created_for).all()
+        
+        # Sort legends by number of likes and ID
+        sorted_legends = sorted(legends, key=lambda legend: (-len(legend.liked_by), legend.id))
+        
+        legend = sorted_legends[0] if sorted_legends else None
+        
+        options = [{
+            "option_id": legend.id,
+            "option_name": legend.option_name,
+            "liked_by": legend.liked_by
+        } for legend in sorted_legends]
 
-    return jsonify({"legend": {"name": legend.option_name, "color": legend.color}, "options": options}), 200
+        return jsonify({"legend": {"name": legend.option_name, "color": legend.color}, "options": options}), 200
+    except SQLAlchemyError as e:
+        print(e)
+        traceback.print_exc()
+        db.session.rollback()
+        return jsonify({"error": "Couldn't post legend"}), 500
 
 def voteLegend():
-    created_for = request.form['created_for']
-    option_id = request.form['option_id']
-    user_id = int(request.form['user_id'])
-
     try:
+        created_for = request.form['created_for']
+        option_id = request.form['option_id']
+        user_id = int(request.form['user_id'])
+
         option = db.session.query(Legend).filter_by(id=option_id, created_for=created_for).one_or_none()
-        
+
         if not option:
             return jsonify({"error": "Invalid option"}), 400
-        
+
         if user_id in option.liked_by:
             option.liked_by.remove(user_id)
         else: 
             option.liked_by.append(user_id)
         db.session.commit()
-        
+
         legends = Legend.query.filter_by(created_for=created_for).all()
-        sorted_legends = sorted(legends, key=lambda legend: (len(legend.liked_by), legend.created_at), reverse=True)
-    
+        
+        # Sort legends by number of likes and ID
+        sorted_legends = sorted(legends, key=lambda legend: (-len(legend.liked_by), legend.id))
+
         options = [{
             "option_id": legend.id,
             "option_name": legend.option_name,
@@ -105,7 +117,9 @@ def getOptions():
 
     try:
         legends = Legend.query.filter_by(created_for=block_id).all()
-        sorted_legends = sorted(legends, key=lambda legend: (len(legend.liked_by), legend.created_at), reverse=True)
+        
+        # Sort legends by number of likes and ID
+        sorted_legends = sorted(legends, key=lambda legend: (-len(legend.liked_by), legend.id))
     
         options = [{
             "option_id": legend.id,
