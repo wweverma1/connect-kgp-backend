@@ -57,6 +57,7 @@ def postLegend():
     
     legend = legends[0]
     options = [{
+        "option_id": legend.id,
         "option_name": legend.option_name,
         "liked_by": legend.liked_by
     } for legend in legends]
