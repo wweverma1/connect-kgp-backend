@@ -11,10 +11,9 @@ import traceback
 
 def getRandomHexCode():
     colors = [
-        "#FF5733", "#33FF57", "#3366FF", "#FF33A1",
-        "#66FF33", "#FF33CC", "#33A1FF", "#FF6633",
-        "#33FFA1", "#CC33FF", "#33FF66", "#FFA133",
-        "#33CCFF", "#FF3366", "#66FFA1", "#FFCC33"
+        "#FF5733", "#3366FF", "#FF33A1", "#FF33CC", "#33A1FF", 
+        "#FF6633", "#CC33FF", "#33FF66", "#FFA133", "#33CCFF", 
+        "#FF3366", "#66FFA1", "#FFCC33"
     ]
     return random.choice(colors)
 
