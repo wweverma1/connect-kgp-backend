@@ -128,11 +128,14 @@ def getFeeds():
     return jsonify(response_data)
 
 def postFeed():
-    user_id = request.form['uid']
+    user_id = int(request.form['uid'])
     content = request.form['content'].strip()
     icon = request.form['icon']
     parent_feed_id = request.form.get('parent_feed_id')
     imageFile = request.form.get('imageFile', None)
+
+    if user_id == 7:
+        return jsonify({"error": "Please sign up to post status"}), 400
 
     if imageFile is not None:
         content+= f'<image>{imageFile}</image>'
