@@ -135,7 +135,7 @@ def postFeed():
     imageFile = request.form.get('imageFile', None)
 
     if user_id == 7:
-        return jsonify({"error": "Please sign up to post status"}), 400
+        return jsonify({"error": "Permission Restricted. Please sign up to start posting status"}), 400
 
     if imageFile is not None:
         content+= f'<image>{imageFile}</image>'
@@ -402,6 +402,46 @@ def removeFriend():
         print(e)
         traceback.print_exc()
         return jsonify({"error": "Invalid input"}), 400
+
+def pokeFriend():
+    uid = int(request.form['user_id'])
+    fid = int(request.form['friend_id'])
+
+    user = db.session.query(User).filter_by(id=uid).one_or_none()
+    friend = db.session.query(User).filter_by(id=fid).one_or_none()
+
+    if user and friend:
+        email_body = f"""\
+            <html>
+            <body>
+                <div style="text-align: center;">
+                    <div style="margin: auto;">
+                        <img src='https://connectkgp.netlify.app/images/connectkgp.png' alt='connectkgp icon' style="height: 22px;" />
+                        <span style="font-weight: bold; font-size: 32px; color: #6559a2;">ConnectKGP</span>
+                    </div>
+                    <span style="font-size: 14px;">KGP ka apna pseudonymous social network</span>
+                </div>
+                <hr>
+                <div>
+                    <p>Hello {friend.name} 👋,</p>
+                    <p><b>{user.name}</b> has requested you to come online at <b style="color: #6559a2;">ConnectKGP</b>, KGP ka apna pseudonymous social network.</p>
+                    <p>See what you've been missing or kindly let us know how we can improve.</p>
+                    <div style="text-align: center; margin: 20px">
+                        <a href="https://connectkgp.netlify.app/" target="_blank" style="font-weight: bold; background-color: #6559a2; padding: 10px; color: white; text-decoration: none;">Sign in Now</a>
+                    </div>
+                </div>
+                <p>Regards 🤗<br><br>
+                    <b style="color: #6559a2;">ConnectKGP</b><br>Made with ❤️ in KGP for KGP
+                </p>
+            </body>
+            </html>
+        """
+        if send_email(friend.email, f"{user.name} misses having you around 🥺", email_body):
+            return jsonify({ "message": "user notified" }), 200
+        else:
+            return jsonify({"error": "Couldn't notify user"}), 500
+    else:
+        return jsonify({"error": "User/users not found"}), 400
     
 def sendInvite():
     username = request.form['username']

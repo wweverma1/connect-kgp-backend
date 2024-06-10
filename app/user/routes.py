@@ -17,7 +17,8 @@ from app.user.controller import (
     sendInvite,
     verifyToken,
     updateAvatar,
-    updatePassword
+    updatePassword,
+    pokeFriend
 )
 
 user_api = Blueprint('user', __name__)
@@ -39,4 +40,5 @@ user_api.add_url_rule(rule='/send-invite', view_func=sendInvite, methods=['POST'
 user_api.add_url_rule(rule='/verify-token', view_func=verifyToken, methods=['GET'])
 user_api.add_url_rule(rule='/update-avatar', view_func=updateAvatar, methods=['POST'])
 user_api.add_url_rule(rule='/update-password', view_func=updatePassword, methods=['POST'])
+user_api.add_url_rule(rule='/poke-friend', view_func=pokeFriend, methods=['POST'])
 
