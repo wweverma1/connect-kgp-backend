@@ -111,7 +111,7 @@ def voteLegend():
 def getOptions():
     block_id = int(request.args.get('block'))
 
-    if not block_id or block_id not in range(1, 9):
+    if not block_id or block_id not in range(1, 10):
         return jsonify({"error": "invalid request"}), 400
 
     try:
