@@ -138,7 +138,7 @@ def postFeed():
         return jsonify({"error": "Permission Restricted. Please sign up to start posting status"}), 400
 
     if imageFile is not None:
-        content+= f'<image>{imageFile}</image>'
+        content+= f'\n<image>{imageFile}</image>'
 
     feed = Feed.post_feed(user_id, content, icon, parent_feed_id)
     if not feed:
