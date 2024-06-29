@@ -67,7 +67,14 @@ def signin():
     if not user:
         return jsonify({"error": "No account registered with this email address"}), 400
     if bcrypt.checkpw(password.encode('utf-8'), user.password):
-        access_token = Token.generate_and_add_token(user.id)
+        active_token = db.session.query(Token).filter(Token.user_id == user.id, Token.valid_till >= datetime.now()).one_or_none()
+        
+        if active_token:
+            active_token.created_at = datetime.now()
+            active_token.valid_till = datetime.now()+timedelta(hours=24)
+        else:
+            access_token = Token.generate_and_add_token(user.id)
+
         if access_token:
             user.last_active = datetime.now()
             Log.add_log(user.id)
